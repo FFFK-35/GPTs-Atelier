@@ -42,7 +42,7 @@ button,input{font:inherit}button{color:inherit}.shell{width:min(100%,900px);marg
 .music-cover-placeholder{display:grid;place-items:center;color:var(--blue);font-size:18px}.music-result-copy{min-width:0;flex:1}.music-result-copy strong,.music-result-copy small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.music-result-copy strong{font-size:12px}.music-result-copy small{font-size:10px;color:var(--muted);margin-top:3px}.music-result .tag{flex:0 0 auto}
 .lyrics-text{white-space:pre-wrap;text-align:center;line-height:2;font-size:12px;color:#c8ccda;max-height:420px;overflow:auto;padding:8px 4px}
 
-.official-player{width:100%;min-width:0;margin-top:14px;padding:10px;border:1px solid var(--line);border-radius:14px;background:#fff}.official-player iframe{display:block;max-width:100%;border-radius:8px}.player-fallback{display:inline-block;margin-top:8px;color:var(--muted);font-size:12px;text-decoration:underline}.</style>
+.official-player{width:100%;min-width:0;margin-top:14px;padding:10px;border:1px solid var(--line);border-radius:14px;background:#fff}.official-player iframe{display:block;max-width:100%;border-radius:8px}.player-fallback{display:inline-block;margin-top:8px;color:var(--muted);font-size:12px;text-decoration:underline}</style>
 </head>
 <body>
 <main class="shell">
@@ -219,7 +219,10 @@ function selectSong(song) {
   } else {
     const frame = document.createElement('iframe');
     const params = new URLSearchParams({type:'2', id:String(song.id), auto:'0', height:'66'});
-    frame.src = 'https://music.163.com/outchain/player?' + params.toString();
+    // NetEase mobile outchain route avoids the mobile redirect that can downgrade HTTPS to HTTP.
+    const mobileBrowser = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+    const playerPath = mobileBrowser ? '/m/outchain/player?' : '/outchain/player?';
+    frame.src = 'https://music.163.com' + playerPath + params.toString();
     frame.title = '网易云音乐官方外链播放器';
     frame.loading = 'lazy';
     frame.referrerPolicy = 'strict-origin-when-cross-origin';
