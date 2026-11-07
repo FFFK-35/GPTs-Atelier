@@ -1,6 +1,6 @@
 # GPT's Atelier Backend
 
-Node.js serverless backend for GPT's Atelier. Deploy this directory as the Vercel project root; it is separate from the GitHub Pages frontend.
+Node.js backend for GPT's Atelier. It can run as a Render Web Service from the `backend` root directory; it is separate from the GitHub Pages frontend. The same route handlers remain compatible with Vercel-style request/response handling.
 
 ## Requirements
 
@@ -52,6 +52,17 @@ This serverless implementation does not provide durable per-user rate limiting b
 - CORS allows the published GitHub Pages origin only. CORS is not authentication.
 - Provider chat compatibility is documented. TTS and custom voice-ID compatibility are not assumed; verify them separately before implementation.
 
-## Deployment
+## Render deployment
 
-Create a Vercel project from `FFFK-35/GPTs-Atelier` and set **Root Directory** to `backend`. Configure the four environment variables above only after rotating any exposed provider key. Enable platform-level rate limiting and usage alerts before making the model endpoint available.
+1. Create a Web Service from `FFFK-35/GPTs-Atelier`.
+2. Set **Branch** to `main` and **Root Directory** to `backend`.
+3. Set **Build Command** to `npm install`.
+4. Set **Start Command** to `npm start`.
+5. Choose the Free instance for initial testing.
+6. Add the music API first; it needs no provider credentials.
+
+Render free web services sleep after 15 minutes without inbound traffic and may take about a minute to wake. Their filesystem is ephemeral, so do not store user data on disk.
+
+## Model gateway safety
+
+The Render adapter keeps `/api/auth/session` and `/api/ai/chat` disabled unless `ATELIER_ENABLE_AI_GATEWAY=true` is explicitly set. Do not enable this flag on a public service until durable platform-level rate limiting/WAF controls and provider usage/budget alerts are configured. The process-local memory of a free web service is not a durable rate limiter. Configure the four secrets above only after rotating any provider key that may have been exposed. Never commit credentials.
