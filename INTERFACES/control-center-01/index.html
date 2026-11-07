@@ -33,7 +33,8 @@ button,input{font:inherit}button{color:inherit}.shell{width:min(100%,900px);marg
 .notes-reply textarea{width:100%;resize:vertical;min-height:64px;padding:10px;border:1px solid var(--line);border-radius:10px;background:#10141e;color:var(--text);font:inherit;font-size:12px}
 .notes-feedback{font-size:11px;color:var(--good);margin-top:8px;min-height:16px}
 @media(max-width:480px){.notes-pop{right:14px;bottom:14px}.notes-launch{align-items:flex-start;flex-direction:column}.notes-launch .action{width:100%}}
-\n@media(max-width:480px){.shell{padding:14px 13px 30px}.hero{padding:21px 17px}.grid{gap:8px}.tile{padding:13px}.nav{gap:7px}.nav button{padding:10px 7px}.status{font-size:10px}}
+
+@media(max-width:480px){.shell{padding:14px 13px 30px}.hero{padding:21px 17px}.grid{gap:8px}.tile{padding:13px}.nav{gap:7px}.nav button{padding:10px 7px}.status{font-size:10px}}
 </style>
 </head>
 <body>
@@ -145,7 +146,8 @@ document.addEventListener('keydown',event=>{
  }
  if(event.key==='Escape') hideNote();
 });
-\ndocument.getElementById('musicSearch').addEventListener('submit',event=>{
+
+document.getElementById('musicSearch').addEventListener('submit',event=>{
  event.preventDefault();
  const query=document.getElementById('songQuery').value.trim();
  document.getElementById('musicNote').textContent=query
