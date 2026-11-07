@@ -3,7 +3,9 @@ import assert from "node:assert/strict";
 import health from "../api/health.js";
 import search from "../api/music/search.js";
 import lyrics from "../api/music/lyrics.js";
+import authSession from "../api/auth/session.js";
 import aiChat from "../api/ai/chat.js";
+import { issueSessionToken, verifySessionToken } from "../api/_lib/session.js";
 
 function response() {
   return {
@@ -16,6 +18,20 @@ function response() {
     json(value) { this.body = value; return this; },
     end() { this.ended = true; return this; }
   };
+}
+
+const allowedOrigin = "https://fffk-35.github.io";
+const testSecret = "test-session-secret-that-is-long-enough-123456";
+
+function saveEnv(names) {
+  return Object.fromEntries(names.map((name) => [name, process.env[name]]));
+}
+
+function restoreEnv(saved) {
+  for (const [name, value] of Object.entries(saved)) {
+    if (value === undefined) delete process.env[name];
+    else process.env[name] = value;
+  }
 }
 
 test("health endpoint reports ready", () => {
@@ -59,46 +75,89 @@ test("music endpoints answer CORS preflight requests", async () => {
   await search({ method: "OPTIONS", query: {} }, res);
   assert.equal(res.statusCode, 204);
   assert.equal(res.ended, true);
-  assert.equal(res.headers["Access-Control-Allow-Origin"], "https://fffk-35.github.io");
+  assert.equal(res.headers["Access-Control-Allow-Origin"], allowedOrigin);
 });
 
+test("session endpoint rejects requests from unknown origins", async () => {
+  const saved = saveEnv(["ATELIER_ACCESS_PASSWORD", "ATELIER_SESSION_SECRET"]);
+  process.env.ATELIER_ACCESS_PASSWORD = "a-private-workspace-password";
+  process.env.ATELIER_SESSION_SECRET = testSecret;
+  const res = response();
+  await authSession({ method: "POST", headers: { origin: "https://evil.example" }, body: { password: "a-private-workspace-password" } }, res);
+  assert.equal(res.statusCode, 403);
+  assert.equal(res.body.error.code, "ORIGIN_NOT_ALLOWED");
+  restoreEnv(saved);
+});
+
+test("session endpoint exchanges the correct password for a signed session", async () => {
+  const saved = saveEnv(["ATELIER_ACCESS_PASSWORD", "ATELIER_SESSION_SECRET"]);
+  process.env.ATELIER_ACCESS_PASSWORD = "a-private-workspace-password";
+  process.env.ATELIER_SESSION_SECRET = testSecret;
+  const res = response();
+  await authSession({ method: "POST", headers: { origin: allowedOrigin }, body: { password: "a-private-workspace-password" } }, res);
+  assert.equal(res.statusCode, 200);
+  assert.equal(res.body.ok, true);
+  assert.equal(verifySessionToken(res.body.token, testSecret), true);
+  assert.equal(res.body.expiresIn, 28800);
+  restoreEnv(saved);
+});
+
+test("session endpoint rejects an incorrect password", async () => {
+  const saved = saveEnv(["ATELIER_ACCESS_PASSWORD", "ATELIER_SESSION_SECRET"]);
+  process.env.ATELIER_ACCESS_PASSWORD = "a-private-workspace-password";
+  process.env.ATELIER_SESSION_SECRET = testSecret;
+  const res = response();
+  await authSession({ method: "POST", headers: { origin: allowedOrigin }, body: { password: "wrong-password" } }, res);
+  assert.equal(res.statusCode, 401);
+  assert.equal(res.body.error.code, "INVALID_PASSWORD");
+  restoreEnv(saved);
+});
+
+test("session tokens expire and cannot be tampered with", () => {
+  const issuedAt = 1_800_000_000_000;
+  const token = issueSessionToken(testSecret, issuedAt);
+  assert.equal(verifySessionToken(token, testSecret, issuedAt + 1000), true);
+  assert.equal(verifySessionToken(token, testSecret, issuedAt + 8 * 60 * 60 * 1000 + 1000), false);
+  assert.equal(verifySessionToken(token + "x", testSecret, issuedAt + 1000), false);
+});
 
 test("model gateway rejects requests until server secrets are configured", async () => {
-  const old = [process.env.HCNSEC_API_KEY, process.env.HCNSEC_MODEL, process.env.ATELIER_GATEWAY_TOKEN];
+  const saved = saveEnv(["HCNSEC_API_KEY", "HCNSEC_MODEL", "ATELIER_SESSION_SECRET"]);
   delete process.env.HCNSEC_API_KEY;
   delete process.env.HCNSEC_MODEL;
-  delete process.env.ATELIER_GATEWAY_TOKEN;
+  delete process.env.ATELIER_SESSION_SECRET;
   const res = response();
-  await aiChat({ method: "POST", headers: {}, body: { messages: [{ role: "user", content: "hi" }] } }, res);
+  await aiChat({ method: "POST", headers: { origin: allowedOrigin }, body: { messages: [{ role: "user", content: "hi" }] } }, res);
   assert.equal(res.statusCode, 503);
   assert.equal(res.body.error.code, "GATEWAY_NOT_CONFIGURED");
-  [process.env.HCNSEC_API_KEY, process.env.HCNSEC_MODEL, process.env.ATELIER_GATEWAY_TOKEN] = old;
+  restoreEnv(saved);
 });
 
-test("model gateway rejects missing private gateway token", async () => {
-  const old = [process.env.HCNSEC_API_KEY, process.env.HCNSEC_MODEL, process.env.ATELIER_GATEWAY_TOKEN];
+test("model gateway rejects missing or invalid session token", async () => {
+  const saved = saveEnv(["HCNSEC_API_KEY", "HCNSEC_MODEL", "ATELIER_SESSION_SECRET"]);
   process.env.HCNSEC_API_KEY = "test-provider-key";
   process.env.HCNSEC_MODEL = "test-model";
-  process.env.ATELIER_GATEWAY_TOKEN = "test-gateway-token";
+  process.env.ATELIER_SESSION_SECRET = testSecret;
   const res = response();
-  await aiChat({ method: "POST", headers: {}, body: { messages: [{ role: "user", content: "hi" }] } }, res);
+  await aiChat({ method: "POST", headers: { origin: allowedOrigin }, body: { messages: [{ role: "user", content: "hi" }] } }, res);
   assert.equal(res.statusCode, 401);
   assert.equal(res.body.error.code, "UNAUTHORIZED");
-  [process.env.HCNSEC_API_KEY, process.env.HCNSEC_MODEL, process.env.ATELIER_GATEWAY_TOKEN] = old;
+  restoreEnv(saved);
 });
 
 test("model gateway validates messages before calling upstream", async () => {
-  const old = [process.env.HCNSEC_API_KEY, process.env.HCNSEC_MODEL, process.env.ATELIER_GATEWAY_TOKEN];
+  const saved = saveEnv(["HCNSEC_API_KEY", "HCNSEC_MODEL", "ATELIER_SESSION_SECRET"]);
   process.env.HCNSEC_API_KEY = "test-provider-key";
   process.env.HCNSEC_MODEL = "test-model";
-  process.env.ATELIER_GATEWAY_TOKEN = "test-gateway-token";
+  process.env.ATELIER_SESSION_SECRET = testSecret;
+  const token = issueSessionToken(testSecret);
   const res = response();
   await aiChat({
     method: "POST",
-    headers: { authorization: "Bearer test-gateway-token" },
+    headers: { origin: allowedOrigin, authorization: `Bearer ${token}` },
     body: { messages: [{ role: "system", content: "" }] }
   }, res);
   assert.equal(res.statusCode, 400);
   assert.equal(res.body.error.code, "INVALID_MESSAGE");
-  [process.env.HCNSEC_API_KEY, process.env.HCNSEC_MODEL, process.env.ATELIER_GATEWAY_TOKEN] = old;
+  restoreEnv(saved);
 });
