@@ -214,7 +214,7 @@ function selectSong(song) {
   document.querySelector('.player-panel .tag').textContent = '正在加载外链';
   const player = document.getElementById('officialPlayer');
   player.replaceChildren();
-  if (!/^\\d+$/.test(String(song.id || ''))) {
+  if (!/^\d+$/.test(String(song.id || ''))) {
     player.textContent = '这首歌曲没有可用的网易云歌曲编号，暂时无法加载外链播放器。';
   } else {
     const frame = document.createElement('iframe');
