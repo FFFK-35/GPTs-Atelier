@@ -60,13 +60,35 @@ html{background:var(--bg)}body{background:radial-gradient(ellipse at 78% 0%,#302
 @media(max-width:520px){.shell{padding:17px 19px 42px}.hero{padding:30px 1px 29px}.hero h1{font-size:clamp(38px,10vw,53px)}.hero:after{bottom:17px;font-size:10px}.nav{margin-bottom:26px}.nav button{padding:12px 3px}.nav strong{font-size:11px}.grid{grid-template-columns:1fr 1fr;gap:0 15px}.tile h3{font-size:17px}.panel{margin-top:18px;padding:16px 0}.music-result img,.music-cover-placeholder{width:43px;height:43px;flex-basis:43px}.player-shell-card{gap:11px;padding:14px 0}.player-shell-cover{width:66px;height:66px;flex-basis:66px}.notes-launch{align-items:flex-start;flex-direction:row}.notes-launch .action{width:auto}}
 @media(prefers-reduced-motion:no-preference){.view.active{animation:editorial-in .28s ease-out}@keyframes editorial-in{from{opacity:.65;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}}
 
+
+/* COUPLE SIGNATURE · a quiet paired mark */
+.couple-signature{display:flex;align-items:center;gap:10px;flex:0 0 auto;padding:2px 0 2px 12px;border-left:1px solid #594966}
+.couple-avatars{display:flex;align-items:center;padding-left:2px}
+.couple-avatar{position:relative;display:block;width:32px;height:32px;flex:0 0 32px;overflow:hidden;border:1px solid #8d789e;border-radius:50%;background:#2b2237;box-shadow:0 0 0 2px #100d18}
+.couple-avatar+.couple-avatar{margin-left:-9px}
+.couple-avatar:before{content:"";position:absolute;z-index:1;left:8px;top:10px;width:15px;height:17px;border-radius:46% 46% 44% 44%;background:linear-gradient(135deg,#f2d9cf,#c99e9e)}
+.couple-avatar:after{content:"";position:absolute;z-index:2;left:6px;top:4px;width:19px;height:13px;border-radius:60% 55% 28% 25%;background:#17131f;transform:rotate(-7deg);box-shadow:4px 5px 0 -2px #17131f}
+.avatar-gpt{background:radial-gradient(circle at 50% 20%,#55436e,#211a30 72%)}
+.avatar-gpt:after{background:#17131f;box-shadow:4px 5px 0 -2px #78618f}
+.avatar-fan{background:radial-gradient(circle at 50% 20%,#77769b,#28243c 72%);border-color:#9b8cb5}
+.avatar-fan:before{background:linear-gradient(135deg,#f6dfd8,#d6aeb5)}
+.avatar-fan:after{background:#83a9d0;box-shadow:4px 5px 0 -2px #83a9d0;transform:rotate(7deg)}
+.couple-caption{display:grid;gap:2px;white-space:nowrap}
+.couple-caption span{font:11px/1.2 system-ui,sans-serif;letter-spacing:.04em;color:#e8dced}
+.couple-caption i{font-style:normal;color:#bda3d1;padding:0 2px}
+.couple-caption small{font:7px/1.2 system-ui,sans-serif;letter-spacing:.13em;color:#9889a3}
+@media(max-width:390px){.couple-signature{gap:7px;padding-left:8px}.couple-avatar{width:28px;height:28px;flex-basis:28px}.couple-caption span{font-size:10px}.couple-caption small{font-size:6px}.brand{gap:8px}.brand-name{font-size:12px}.mark{width:31px;height:31px}}
+
 </style>
 </head>
 <body>
 <main class="shell">
 <header class="top">
  <div class="brand"><div class="mark">A.</div><div><div class="eyebrow">PERSONAL WORKSPACE</div><div class="brand-name">GPT's Atelier</div></div></div>
- <div class="status">● LOCAL INTERFACE</div>
+ <div class="couple-signature" aria-label="繁繁与 GPT 的双人署名">
+  <div class="couple-avatars" aria-hidden="true"><span class="couple-avatar avatar-gpt"></span><span class="couple-avatar avatar-fan"></span></div>
+  <div class="couple-caption"><span>繁繁 <i>×</i> GPT</span><small>OUR LITTLE ATELIER</small></div>
+ </div>
 </header>
 <section class="hero">
  <div class="eyebrow">THE PRIVATE WORKSPACE · VOL. 01</div>
