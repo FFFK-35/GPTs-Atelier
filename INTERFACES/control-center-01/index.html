@@ -211,7 +211,6 @@ async function loadLyrics(song) {
 function selectSong(song) {
   document.getElementById('trackTitle').textContent = song.name || '未知歌曲';
   document.getElementById('trackArtist').textContent = (song.artists || []).join(' / ') + (song.album ? ' · ' + song.album : '');
-  document.getElementById('duration').textContent = formatDuration(song.durationMs);
   document.querySelector('.player-panel .tag').textContent = '正在加载外链';
   const player = document.getElementById('officialPlayer');
   player.replaceChildren();
