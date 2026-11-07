@@ -42,7 +42,7 @@ button,input{font:inherit}button{color:inherit}.shell{width:min(100%,900px);marg
 .music-cover-placeholder{display:grid;place-items:center;color:var(--blue);font-size:18px}.music-result-copy{min-width:0;flex:1}.music-result-copy strong,.music-result-copy small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.music-result-copy strong{font-size:12px}.music-result-copy small{font-size:10px;color:var(--muted);margin-top:3px}.music-result .tag{flex:0 0 auto}
 .lyrics-text{white-space:pre-wrap;text-align:center;line-height:2;font-size:12px;color:#c8ccda;max-height:420px;overflow:auto;padding:8px 4px}
 
-</style>
+.official-player{width:100%;min-width:0;margin-top:14px;padding:10px;border:1px solid var(--line);border-radius:14px;background:#fff}.official-player iframe{display:block;max-width:100%;border-radius:8px}.player-fallback{display:inline-block;margin-top:8px;color:var(--muted);font-size:12px;text-decoration:underline}.</style>
 </head>
 <body>
 <main class="shell">
@@ -84,9 +84,8 @@ button,input{font:inherit}button{color:inherit}.shell{width:min(100%,900px);marg
  <div class="panel player-panel">
   <div class="music-panel-head"><div><h3>正在播放</h3><p>PLAYER</p></div><span class="tag">待连接</span></div>
   <div class="player-main"><div class="album-art">♫</div><div class="player-track"><strong id="trackTitle">尚未选择歌曲</strong><small id="trackArtist">选择搜索结果后显示歌曲信息</small></div></div>
-  <div class="progress-wrap"><div class="progress-meta"><span id="currentTime">00:00</span><span id="duration">00:00</span></div><div class="progress-track"><span></span></div></div>
-  <div class="player-controls"><button class="player-control" type="button" disabled aria-label="上一首">|◀</button><button class="player-play" type="button" disabled aria-label="播放">▶</button><button class="player-control" type="button" disabled aria-label="下一首">▶|</button></div>
-  <p class="player-hint">播放控制将在获得合法可用的音频来源后启用。</p>
+  <div id="officialPlayer" class="official-player"><div class="music-empty">先从搜索结果中选择一首歌，加载网易云外链播放器。</div></div>
+  <p class="player-hint">播放由网易云官方外链播放器提供。请点击播放器内的播放键；部分歌曲可能因版权或分享设置无法外链。</p>
  </div>
  <div class="panel lyrics-panel"><div class="music-panel-head"><div><h3>歌词</h3><p>LYRICS</p></div><span class="tag">未载入</span></div><div id="lyricsContent" class="lyrics-empty">选择歌曲后，这里将展示对应歌词。</div></div>
  <div class="notes-launch">
@@ -213,7 +212,32 @@ function selectSong(song) {
   document.getElementById('trackTitle').textContent = song.name || '未知歌曲';
   document.getElementById('trackArtist').textContent = (song.artists || []).join(' / ') + (song.album ? ' · ' + song.album : '');
   document.getElementById('duration').textContent = formatDuration(song.durationMs);
-  document.querySelector('.player-panel .tag').textContent = '已选歌曲';
+  document.querySelector('.player-panel .tag').textContent = '正在加载外链';
+  const player = document.getElementById('officialPlayer');
+  player.replaceChildren();
+  if (!/^\\d+$/.test(String(song.id || ''))) {
+    player.textContent = '这首歌曲没有可用的网易云歌曲编号，暂时无法加载外链播放器。';
+  } else {
+    const frame = document.createElement('iframe');
+    const params = new URLSearchParams({type:'2', id:String(song.id), auto:'0', height:'66'});
+    frame.src = 'https://music.163.com/outchain/player?' + params.toString();
+    frame.title = '网易云音乐官方外链播放器';
+    frame.loading = 'lazy';
+    frame.referrerPolicy = 'strict-origin-when-cross-origin';
+    frame.allow = 'autoplay; encrypted-media';
+    frame.setAttribute('frameborder', '0');
+    frame.style.width = '100%';
+    frame.style.height = '86px';
+    frame.style.border = '0';
+    player.append(frame);
+    const fallback = document.createElement('a');
+    fallback.href = 'https://music.163.com/#/song?id=' + encodeURIComponent(song.id);
+    fallback.target = '_blank';
+    fallback.rel = 'noopener noreferrer';
+    fallback.textContent = '播放器无法显示？在网易云音乐中打开这首歌';
+    fallback.className = 'player-fallback';
+    player.append(fallback);
+  }
   loadLyrics(song);
 }
 function renderSongResults(items) {
