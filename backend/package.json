@@ -3,11 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "engines": {
-    "node": ">=20"
-  },
+  "engines": { "node": ">=20" },
   "scripts": {
-    "check": "node --check api/health.js && node --check api/music/search.js && node --check api/music/lyrics.js && node --check api/_lib/netease.js",
+    "check": "node --check api/health.js && node --check api/music/search.js && node --check api/music/lyrics.js && node --check api/ai/chat.js && node --check api/_lib/netease.js",
     "test": "node --test"
   },
   "dependencies": {
