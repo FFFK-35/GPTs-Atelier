@@ -41,6 +41,7 @@ The gateway limits requests to 20 messages and 12,000 input characters, and limi
 - Phase 1 does not request or store a NetEase account cookie.
 - Music endpoints return metadata and lyric text only; they do not provide audio playback or bypass VIP, copyright, DRM, or regional restrictions.
 - The upstream NetEase interface is unofficial and may change or become unavailable.
+- Music search and lyric retrieval use Node.js built-in `fetch`; the backend intentionally has no third-party runtime dependencies.
 - Do not add account cookies, passwords, tokens, or other credentials to this repository.
 - CORS allows the published GitHub Pages origin only. CORS is not authentication; the model gateway also requires its separate bearer token.
 - Provider chat compatibility is documented. TTS and custom voice-ID compatibility are not assumed; verify them separately before implementation.
