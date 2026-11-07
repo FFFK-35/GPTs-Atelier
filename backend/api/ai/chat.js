@@ -1,3 +1,5 @@
+import { verifySessionToken } from "../_lib/session.js";
+
 const PROVIDER_BASE_URL = "https://api.hcnsec.cn/v1";
 const ALLOWED_ORIGIN = "https://fffk-35.github.io";
 
@@ -22,16 +24,21 @@ export default async function handler(req, res) {
     return fail(res, 405, "METHOD_NOT_ALLOWED", "仅支持 POST");
   }
 
-  const gatewayToken = process.env.ATELIER_GATEWAY_TOKEN;
+  if (req.headers?.origin !== ALLOWED_ORIGIN) {
+    return fail(res, 403, "ORIGIN_NOT_ALLOWED", "请求来源不受允许");
+  }
+
+  const sessionSecret = process.env.ATELIER_SESSION_SECRET;
   const providerKey = process.env.HCNSEC_API_KEY;
   const model = process.env.HCNSEC_MODEL;
-  if (!gatewayToken || !providerKey || !model) {
+  if (!sessionSecret || sessionSecret.length < 32 || !providerKey || !model) {
     return fail(res, 503, "GATEWAY_NOT_CONFIGURED", "模型服务尚未完成服务器配置");
   }
 
   const auth = req.headers?.authorization ?? req.headers?.Authorization ?? "";
-  if (auth !== `Bearer ${gatewayToken}`) {
-    return fail(res, 401, "UNAUTHORIZED", "未通过网关身份验证");
+  const token = auth.startsWith("Bearer ") ? auth.slice(7) : "";
+  if (!verifySessionToken(token, sessionSecret)) {
+    return fail(res, 401, "UNAUTHORIZED", "登录状态已失效，请重新登录");
   }
 
   const messages = req.body?.messages;
