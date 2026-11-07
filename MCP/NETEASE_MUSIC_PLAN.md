@@ -34,9 +34,13 @@ Connect GPT's Atelier Control Center to NetEase Cloud Music, starting with anony
 - Never put cookies, tokens, or private service URLs in this public repository or browser JavaScript.
 - Require HTTPS and authentication before exposing any account-capable endpoint.
 
-## Candidate implementation
+## Candidate implementation and integration note
 
-Evaluate `weiyu-t/netease-music-mcp-vercel` as a reference implementation for anonymous search and timestamped lyrics. It documents a no-login design, input validation, request timeouts/throttling, tests, and a Vercel HTTP/MCP route. It is an unofficial integration using public web API behavior, so upstream compatibility is not guaranteed.
+Evaluate `weiyu-t/netease-music-mcp-vercel` as a reference implementation for anonymous search and timestamped lyrics. It documents a no-login design, input validation, request timeouts/throttling, tests, and a Vercel Streamable HTTP MCP route at `/api/mcp`.
+
+Important: this repository exposes MCP tools, not a ready-made browser REST API for the Music Lab page. The browser UI cannot simply call `/api/mcp` as if it were `/api/search`. We must either add a small authenticated/limited REST adapter for search and lyrics, or build a separate MCP-aware client layer. Do not expose a public unauthenticated account-capable MCP endpoint. For the first anonymous search/lyrics phase, use strict input validation, rate limiting, timeouts, and no account credentials.
+
+This is an unofficial integration using public NetEase web API behavior, so upstream compatibility is not guaranteed. Do not promise audio playback: the candidate focuses on metadata and timestamped lyrics, and VIP/region/copyright restrictions remain in force.
 
 Reference: https://github.com/weiyu-t/netease-music-mcp-vercel
 
