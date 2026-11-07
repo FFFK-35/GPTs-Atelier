@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#10121a">
+<meta name="description" content="GPT's Atelier · Control Center 01">
+<title>Control Center 01 · GPT's Atelier</title>
+<style>
+:root{color-scheme:dark;--bg:#0d0f16;--panel:#151925;--panel2:#1b2030;--line:#2a3042;--text:#eef0f8;--muted:#9299ad;--blue:#9bb8ff;--violet:#b6a1f5;--good:#9bcdb8}
+*{box-sizing:border-box}html{min-height:100%;background:var(--bg)}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 85% 0%,#24213b 0,transparent 38%),var(--bg);color:var(--text);font:15px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif}
+button,input{font:inherit}button{color:inherit}.shell{width:min(100%,900px);margin:auto;padding:22px 18px 42px}.top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 0 24px}.brand{display:flex;align-items:center;gap:11px}.mark{width:38px;height:38px;border:1px solid #55516f;border-radius:12px;display:grid;place-items:center;color:var(--blue);background:linear-gradient(145deg,#25243b,#151925);font-weight:700}.eyebrow{font-size:10px;letter-spacing:.2em;color:var(--muted)}.brand-name{font-size:15px;font-weight:650;letter-spacing:.02em}.status{font-size:11px;color:var(--good);border:1px solid #355347;border-radius:99px;padding:5px 9px;white-space:nowrap}.hero{padding:25px 22px;border:1px solid var(--line);border-radius:20px;background:linear-gradient(125deg,#1b2030,#171827 65%,#22203a);box-shadow:0 18px 55px #0003}.hero h1{font-size:clamp(25px,6vw,36px);line-height:1.15;margin:8px 0 10px;letter-spacing:-.04em}.hero p{color:#b2b7c8;max-width:570px;margin:0}.hero .eyebrow{color:var(--violet)}.section-head{display:flex;justify-content:space-between;align-items:end;margin:26px 2px 12px}.section-head h2{font-size:16px;margin:0}.section-head span{font-size:11px;color:var(--muted)}.nav{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:18px}.nav button{border:1px solid var(--line);background:#141824;border-radius:13px;padding:12px 8px;text-align:left;min-height:66px;cursor:pointer}.nav button[aria-current=true]{border-color:#7770a8;background:#222039}.nav strong{display:block;font-size:13px}.nav small{display:block;color:var(--muted);font-size:10px;margin-top:3px}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}.tile,.panel{border:1px solid var(--line);background:linear-gradient(145deg,var(--panel),#121620);border-radius:16px;padding:16px}.tile .kicker{font-size:10px;letter-spacing:.13em;color:var(--muted)}.tile h3{font-size:15px;margin:8px 0 4px}.tile p{font-size:12px;color:var(--muted);margin:0}.panel{margin-top:12px}.panel h3{font-size:14px;margin:0 0 8px}.panel p{font-size:12px;color:var(--muted);margin:0}.search{display:flex;gap:8px;margin-top:12px}.search input{min-width:0;flex:1;background:#0e121b;border:1px solid var(--line);border-radius:11px;padding:11px 12px;color:var(--text);outline:none}.search input:focus{border-color:var(--blue)}.action{border:1px solid #55516f;background:#24213a;border-radius:11px;padding:10px 13px;cursor:pointer}.action:active,.nav button:active{transform:scale(.98)}.notice{border-left:2px solid var(--violet);padding:9px 12px;background:#1b1a2a;border-radius:0 10px 10px 0;color:#b9b8ca;font-size:11px;margin-top:13px}.view{display:none}.view.active{display:block}.list{display:grid;gap:9px;margin-top:12px}.list-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 12px;background:#10141e;border:1px solid #252b3a;border-radius:11px}.list-row strong{font-size:12px}.list-row small{display:block;color:var(--muted);font-size:10px}.tag{font-size:10px;color:var(--blue);border:1px solid #39445d;padding:3px 7px;border-radius:99px;white-space:nowrap}.footer{margin-top:28px;padding:15px 2px;border-top:1px solid var(--line);font-size:10px;color:#747c91;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+@media(max-width:480px){.shell{padding:14px 13px 30px}.hero{padding:21px 17px}.grid{gap:8px}.tile{padding:13px}.nav{gap:7px}.nav button{padding:10px 7px}.status{font-size:10px}}
+</style>
+</head>
+<body>
+<main class="shell">
+<header class="top">
+ <div class="brand"><div class="mark">A.</div><div><div class="eyebrow">PERSONAL WORKSPACE</div><div class="brand-name">GPT's Atelier</div></div></div>
+ <div class="status">● LOCAL INTERFACE</div>
+</header>
+<section class="hero">
+ <div class="eyebrow">CONTROL CENTER · 01</div>
+ <h1>A quiet place<br>to make things work.</h1>
+ <p>一个属于我们的轻量工作台。先把入口整理好，再逐步连接真正的云端服务。</p>
+</section>
+<nav class="nav" aria-label="工作台导航">
+ <button data-view="overview" aria-current="true"><strong>总览 Overview</strong><small>工作室首页</small></button>
+ <button data-view="music" aria-current="false"><strong>音乐 Music Lab</strong><small>音乐服务入口</small></button>
+ <button data-view="tools" aria-current="false"><strong>工具 Toolbox</strong><small>扩展能力</small></button>
+</nav>
+<section class="view active" id="overview">
+ <div class="section-head"><h2>Workspace</h2><span>工作室概况</span></div>
+ <div class="grid">
+  <article class="tile"><div class="kicker">01 / INTERFACE</div><h3>Control Center</h3><p>移动端控制台基础界面已就位。</p></article>
+  <article class="tile"><div class="kicker">02 / CONNECTION</div><h3>Cloud services</h3><p>云端连接尚未配置。</p></article>
+  <article class="tile"><div class="kicker">03 / MUSIC</div><h3>Music Lab</h3><p>等待接入音乐搜索与播放服务。</p></article>
+  <article class="tile"><div class="kicker">04 / TOOLS</div><h3>Toolbox</h3><p>为后续工具模块预留入口。</p></article>
+ </div>
+ <div class="panel"><h3>接下来</h3><p>先完成网页部署与手机验收，然后再连接音乐服务。界面本身不需要依赖外部字体、图片或 CDN。</p><div class="notice">当前是前端基础版本。尚未连接音乐账号、云端 API 或 MCP 服务；不会假装这些功能已经可用。</div></div>
+</section>
+<section class="view" id="music">
+ <div class="section-head"><h2>Music Lab</h2><span>音乐实验室</span></div>
+ <div class="panel"><h3>音乐服务入口</h3><p>这里将逐步加入歌曲搜索、歌曲信息、歌词与播放控制。</p>
+  <form class="search" id="musicSearch"><input id="songQuery" type="search" placeholder="输入歌曲名或歌手（界面演示）" aria-label="歌曲搜索词"><button class="action" type="submit">搜索</button></form>
+  <div class="notice" id="musicNote" aria-live="polite">音乐服务尚未连接。现在的搜索框仅用于界面预览，不会发送搜索请求。</div>
+ </div>
+ <div class="panel"><h3>播放器</h3><div class="list-row"><div><strong id="trackTitle">尚未选择歌曲</strong><small id="trackArtist">连接音乐服务后将在这里显示播放信息</small></div><span class="tag">未连接</span></div></div>
+</section>
+<section class="view" id="tools">
+ <div class="section-head"><h2>Toolbox</h2><span>工具箱</span></div>
+ <div class="list">
+  <div class="list-row"><div><strong>GitHub</strong><small>仓库与文件操作 · 后续接入</small></div><span class="tag">计划中</span></div>
+  <div class="list-row"><div><strong>Files</strong><small>文件检索与整理 · 后续接入</small></div><span class="tag">计划中</span></div>
+  <div class="list-row"><div><strong>MCP Core</strong><small>统一工具服务入口 · 后续接入</small></div><span class="tag">计划中</span></div>
+  <div class="list-row"><div><strong>Browser</strong><small>网页检索与自动化 · 后续评估</small></div><span class="tag">计划中</span></div>
+ </div>
+ <div class="panel"><h3>安全原则</h3><p>账号 Cookie、访问令牌和 API 密钥不会写进网页源码或公开仓库。需要凭据时，优先放在受保护的云端环境变量中。</p></div>
+</section>
+<footer class="footer"><span>GPT'S ATELIER · BUILT FOR SMALL SCREENS</span><span>CONTROL CENTER 01 · v0.1</span></footer>
+</main>
+<script>
+const buttons=[...document.querySelectorAll('.nav button')];
+const views=[...document.querySelectorAll('.view')];
+buttons.forEach(button=>button.addEventListener('click',()=>{
+ const id=button.dataset.view;
+ buttons.forEach(item=>item.setAttribute('aria-current',String(item===button)));
+ views.forEach(view=>view.classList.toggle('active',view.id===id));
+}));
+document.getElementById('musicSearch').addEventListener('submit',event=>{
+ event.preventDefault();
+ const query=document.getElementById('songQuery').value.trim();
+ document.getElementById('musicNote').textContent=query
+  ? '已收到“'+query+'”。音乐服务还未连接，因此暂时不会发起真实搜索。'
+  : '先输入歌曲名或歌手吧。当前搜索框仅用于界面预览。';
+});
+</script>
+</body>
+</html>
