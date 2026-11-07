@@ -1,0 +1,49 @@
+name: Dependency security audit
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "backend/package.json"
+      - ".github/workflows/dependency-audit.yml"
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install dependencies and generate lockfile
+        run: npm install --package-lock-only
+      - name: Run npm security audit
+        run: |
+          npm audit --json > audit-report.json || true
+          node --input-type=commonjs -e '
+            const report = require("./audit-report.json");
+            const meta = report.metadata?.vulnerabilities ?? {};
+            console.log("Vulnerability summary:", JSON.stringify(meta));
+            for (const [name, item] of Object.entries(report.vulnerabilities ?? {})) {
+              console.log(JSON.stringify({
+                package: name,
+                severity: item.severity,
+                direct: item.isDirect,
+                range: item.range,
+                via: item.via,
+                fixAvailable: item.fixAvailable
+              }, null, 2));
+            }
+          '
+      - name: Upload full audit report
+        uses: actions/upload-artifact@v4
+        with:
+          name: npm-audit-report
+          path: backend/audit-report.json
+          if-no-files-found: error
