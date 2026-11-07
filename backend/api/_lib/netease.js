@@ -1,4 +1,6 @@
-import { cloudsearch, lyric } from "NeteaseCloudMusicApi";
+import NeteaseCloudMusicApi from "NeteaseCloudMusicApi";
+
+const { cloudsearch, lyric } = NeteaseCloudMusicApi;
 
 export class UpstreamError extends Error {
   constructor(message, status = 502) {
