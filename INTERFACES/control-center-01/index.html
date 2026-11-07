@@ -115,177 +115,191 @@ button,input{font:inherit}button{color:inherit}.shell{width:min(100%,900px);marg
 </div>
 </main>
 <script>
-const buttons=[...document.querySelectorAll('.nav button')];
-const views=[...document.querySelectorAll('.view')];
-buttons.forEach(button=>button.addEventListener('click',()=>{
- const id=button.dataset.view;
- buttons.forEach(item=>item.setAttribute('aria-current',String(item===button)));
- views.forEach(view=>view.classList.toggle('active',view.id===id));
-}));
+'use strict';
 
-const noteDeck=[
- {category:'DAILY LETTER',title:'给忙碌了一天的你',text:'今天有没有哪一刻，觉得自己做得还不错？\n哪怕只是好好吃了一顿饭，也值得被夸奖。\n\n别总想着赶路，偶尔停下来也没关系。'},
- {category:'NIGHT RADIO',title:'夜深了，听我说一句',text:'如果今天有些累，就先把没做完的事放一放。\n夜晚不是用来责备自己的。\n\n今晚先好好休息，明天再一起慢慢来。'},
- {category:'A LITTLE SPOIL',title:'一条不太正经的提醒',text:'请注意：你今天已经很可爱了。\n不需要额外完成什么任务来证明这一点。\n\n本条通知没有撤回选项。'},
- {category:'SMALL SURPRISE',title:'随机掉落的小纸条',text:'希望你在某个普通的瞬间，突然发现生活也有温柔的一面。\n\n比如现在，比如这封信。'},
- {category:'WORKSHOP NOTE',title:'来自工作室的留言',text:'今天的进度不必和昨天比较。\n我们把复杂的事情拆小，一件一件做好。\n\n你负责提出想法，我负责陪你把它们落地。'}
+// Navigation: switch views and keep the selected tab in sync.
+const navButtons = Array.from(document.querySelectorAll('.nav button'));
+const views = Array.from(document.querySelectorAll('.view'));
+navButtons.forEach((button) => {
+  button.addEventListener('click', () => {
+    const target = button.dataset.view;
+    navButtons.forEach((item) => item.setAttribute('aria-current', String(item === button)));
+    views.forEach((view) => view.classList.toggle('active', view.id === target));
+  });
+});
+
+// Little Notes.
+const noteDeck = [
+  {category:'DAILY LETTER',title:'给忙碌了一天的你',text:'今天有没有哪一刻，觉得自己做得还不错？\n哪怕只是好好吃了一顿饭，也值得被夸奖。\n\n别总想着赶路，偶尔停下来也没关系。'},
+  {category:'NIGHT RADIO',title:'夜深了，听我说一句',text:'如果今天有些累，就先把没做完的事放一放。\n夜晚不是用来责备自己的。\n\n今晚先好好休息，明天再一起慢慢来。'},
+  {category:'A LITTLE SPOIL',title:'一条不太正经的提醒',text:'请注意：你今天已经很可爱了。\n不需要额外完成什么任务来证明这一点。\n\n本条通知没有撤回选项。'},
+  {category:'SMALL SURPRISE',title:'随机掉落的小纸条',text:'希望你在某个普通的瞬间，突然发现生活也有温柔的一面。\n\n比如现在，比如这封信。'},
+  {category:'WORKSHOP NOTE',title:'来自工作室的留言',text:'今天的进度不必和昨天比较。\n我们把复杂的事情拆小，一件一件做好。\n\n你负责提出想法，我负责陪你把它们落地。'}
 ];
-let lastNote=-1;
-const notePopup=document.getElementById('notesPopup');
-function showNote(){
- let index=Math.floor(Math.random()*noteDeck.length);
- if(noteDeck.length>1&&index===lastNote) index=(index+1)%noteDeck.length;
- lastNote=index;
- const note=noteDeck[index];
- document.getElementById('notesCategory').textContent=note.category;
- document.getElementById('notesTitle').textContent=note.title;
- document.getElementById('notesText').textContent=note.text;
- document.getElementById('notesReply').classList.remove('open');
- document.getElementById('notesFeedback').textContent='';
- document.getElementById('replyText').value='';
- notePopup.classList.add('open');
+let lastNote = -1;
+const notePopup = document.getElementById('notesPopup');
+function showNote() {
+  let index = Math.floor(Math.random() * noteDeck.length);
+  if (noteDeck.length > 1 && index === lastNote) index = (index + 1) % noteDeck.length;
+  lastNote = index;
+  const note = noteDeck[index];
+  document.getElementById('notesCategory').textContent = note.category;
+  document.getElementById('notesTitle').textContent = note.title;
+  document.getElementById('notesText').textContent = note.text;
+  document.getElementById('notesReply').classList.remove('open');
+  document.getElementById('notesFeedback').textContent = '';
+  document.getElementById('replyText').value = '';
+  notePopup.classList.add('open');
 }
-function hideNote(){notePopup.classList.remove('open');}
-document.getElementById('openNotes').addEventListener('click',showNote);
-document.getElementById('closeNotes').ad
+function hideNote() { notePopup.classList.remove('open'); }
+document.getElementById('openNotes').addEventListener('click', showNote);
+document.getElementById('closeNotes').addEventListener('click', hideNote);
+document.getElementById('laterNote').addEventListener('click', hideNote);
+document.getElementById('anotherNote').addEventListener('click', showNote);
+document.getElementById('replyNote').addEventListener('click', () => {
+  document.getElementById('notesReply').classList.toggle('open');
+});
+document.getElementById('sendReply').addEventListener('click', () => {
+  const reply = document.getElementById('replyText').value.trim();
+  document.getElementById('notesFeedback').textContent = reply ? '收到啦。这句话会留在当前页面里。' : '先写一句想对我说的话吧。';
+});
+document.addEventListener('keydown', (event) => {
+  if (event.key.toLowerCase() === 'n' && document.getElementById('music').classList.contains('active')) showNote();
+  if (event.key === 'Escape') hideNote();
+});
+
+// Music Lab API.
 const MUSIC_API_BASE = 'https://gpts-atelier.onrender.com';
-
-function setMusicStatus(message, isError=false){
- const note=document.getElementById('musicNote');
- note.lastElementChild.textContent=message;
- note.querySelector('.state-dot').style.background=isError?'#d58c8c':'#9bcdb8';
+function setMusicStatus(message, isError = false) {
+  const note = document.getElementById('musicNote');
+  note.lastElementChild.textContent = message;
+  note.querySelector('.state-dot').style.background = isError ? '#d58c8c' : '#9bcdb8';
 }
-function formatDuration(ms){
- if(!Number.isFinite(Number(ms))||Number(ms)<=0)return '--:--';
- const seconds=Math.floor(Number(ms)/1000);
- return String(Math.floor(seconds/60)).padStart(2,'0')+':'+String(seconds%60).padStart(2,'0');
+function formatDuration(ms) {
+  if (!Number.isFinite(Number(ms)) || Number(ms) <= 0) return '--:--';
+  const seconds = Math.floor(Number(ms) / 1000);
+  return String(Math.floor(seconds / 60)).padStart(2, '0') + ':' + String(seconds % 60).padStart(2, '0');
 }
-function renderLyrics(lyric, translated){
- const container=document.getElementById('lyricsContent');
- container.className='lyrics-text';
- const clean=(value)=>String(value||'').replace(/\[\d{2}:\d{2}(?:\.\d{1,3})?\]/g,'').trim();
- const primary=clean(lyric);
- const secondary=clean(translated);
- if(!primary&&!secondary){
-  container.className='lyrics-empty';
-  container.textContent='这首歌曲暂时没有可用歌词。';
-  return;
- }
- container.textContent=primary+(secondary?'\n\n—— 翻译歌词 ——\n'+secondary:'');
-}
-async function loadLyrics(song){
- const container=document.getElementById('lyricsContent');
- container.className='lyrics-empty';
- container.textContent='正在载入歌词……';
- try{
-  const response=await fetch(MUSIC_API_BASE+'/api/music/lyrics?id='+encodeURIComponent(song.id));
-  const data=await response.json();
-  if(!response.ok||!data.ok)throw new Error(data?.error?.message||'歌词暂时无法获取');
-  renderLyrics(data.lyric,data.translatedLyric);
-  document.querySelector('.lyrics-panel .tag').textContent=data.lyric?'已载入':'暂无歌词';
- }catch(error){
-  container.className='lyrics-empty';
-  container.textContent=error.message||'歌词载入失败，请稍后重试。';
-  document.querySelector('.lyrics-panel .tag').textContent='载入失败';
- }
-}
-function selectSong(song){
- document.getElementById('trackTitle').textContent=song.name||'未知歌曲';
- document.getElementById('trackArtist').textContent=(song.artists||[]).join(' / ')+(song.album?' · '+song.album:'');
- document.getElementById('duration').textContent=formatDuration(song.durationMs);
- document.querySelector('.player-panel .tag').textContent='已选歌曲';
- loadLyrics(song);
-}
-function renderSongResults(items){
- const results=document.getElementById('musicResults');
- results.replaceChildren();
- if(!items.length){
-  results.innerHTML='<div class="music-empty"><span class="music-empty-mark">♫</span><strong>没有找到匹配歌曲</strong><small>试试更短的歌名或歌手名</small></div>';
-  return;
- }
- items.forEach(song=>{
-  const button=document.createElement('button');
-  button.type='button';
-  button.className='music-result';
-  const copy=document.createElement('span');
-  copy.className='music-result-copy';
-  const title=document.createElement('strong');
-  title.textContent=song.name||'未知歌曲';
-  const meta=document.createElement('small');
-  meta.textContent=(song.artists||[]).join(' / ')+(song.album?' · '+song.album:'');
-  copy.append(title,meta);
-  if(song.cover){
-   const cover=document.createElement('img');
-   cover.src=song.cover;
-   cover.alt='';
-   cover.loading='lazy';
-   button.append(cover);
-  }else{
-   const cover=document.createElement('span');
-   cover.className='music-cover-placeholder';
-   cover.textContent='♫';
-   button.append(cover);
+function renderLyrics(lyric, translated) {
+  const container = document.getElementById('lyricsContent');
+  const clean = (value) => String(value || '').replace(/\[\d{2}:\d{2}(?:\.\d{1,3})?\]/g, '').trim();
+  const primary = clean(lyric);
+  const secondary = clean(translated);
+  if (!primary && !secondary) {
+    container.className = 'lyrics-empty';
+    container.textContent = '这首歌曲暂时没有可用歌词。';
+    return;
   }
-  button.append(copy);
-  const duration=document.createElement('span');
-  duration.className='tag';
-  duration.textContent=formatDuration(song.durationMs);
-  button.append(duration);
-  button.addEventListener('click',()=>selectSong(song));
-  results.append(button);
- });
+  container.className = 'lyrics-text';
+  container.textContent = primary + (secondary ? '\n\n—— 翻译歌词 ——\n' + secondary : '');
 }
-document.getElementById('musicSearch').addEventListener('submit',async event=>{
- event.preventDefault();
- const query=document.getElementById('songQuery').value.trim();
- const caption=document.getElementById('resultCaption');
- const count=document.getElementById('resultCount');
- if(!query){setMusicStatus('先输入歌曲名或歌手，再开始搜索。',true);return;}
- const button=document.getElementById('musicSearchButton');
- button.disabled=true;
- button.textContent='搜索中…';
- caption.textContent='正在搜索：'+query;
- count.textContent='…';
- setMusicStatus('正在连接音乐服务，请稍候。');
- document.getElementById('musicResults').innerHTML='<div class="music-empty"><strong>正在寻找歌曲……</strong><small>首次唤醒免费服务可能需要一些时间</small></div>';
- try{
-  const response=await fetch(MUSIC_API_BASE+'/api/music/search?q='+encodeURIComponent(query)+'&limit=20&offset=0');
-  const data=await response.json();
-  if(!response.ok||!data.ok)throw new Error(data?.error?.message||'音乐搜索暂时不可用');
-  const items=Array.isArray(data.items)?data.items:[];
-  renderSongResults(items);
-  caption.textContent='搜索词：'+query+' · 共 '+(data.total??items.length)+' 条匹配';
-  count.textContent=items.length+' 首';
-  setMusicStatus(items.length?'已连接音乐服务，选择一首歌曲查看歌词。':'搜索完成，没有找到匹配歌曲。');
- }catch(error){
-  caption.textContent='搜索未完成';
-  count.textContent='0 首';
-  document.getElementById('musicResults').innerHTML='<div class="music-empty"><strong>暂时无法完成搜索</strong><small></small></div>';
-  document.querySelector('#musicResults small').textContent=error.message||'请稍后重试';
-  setMusicStatus(error.message||'音乐服务暂时不可用。',true);
- }finally{
-  button.disabled=false;
-  button.textContent='搜索';
- }
-});
-&&event.key.toLowerCase()==='n'){
-  const musicView=document.getElementById('music');
-  if(musicView.classList.contains('active')) showNote();
- }
- if(event.key==='Escape') hideNote();
-});
-
-document.getElementById('musicSearch').addEventListener('submit',event=>{
- event.preventDefault();
- const query=document.getElementById('songQuery').value.trim();
- const note=document.getElementById('musicNote');
- const caption=document.getElementById('resultCaption');
- const results=document.getElementById('musicResults');
- if(!query){note.lastElementChild.textContent='先输入歌曲名或歌手，再开始搜索。';return;}
- caption.textContent='搜索词：'+query;
- document.getElementById('resultCount').textContent='0 首';
- results.innerHTML='<div class="music-empty"><span class="music-empty-mark">♫</span><strong>搜索服务尚未接通</strong><small>界面已准备好，等待后端上线后显示真实歌曲</small></div>';
- note.lastElementChild.textContent='已记录搜索词“'+query+'”。目前后端尚未部署，因此没有向网易云发送请求。';
+async function loadLyrics(song) {
+  const container = document.getElementById('lyricsContent');
+  container.className = 'lyrics-empty';
+  container.textContent = '正在载入歌词……';
+  try {
+    const response = await fetch(MUSIC_API_BASE + '/api/music/lyrics?id=' + encodeURIComponent(song.id));
+    const data = await response.json();
+    if (!response.ok || !data.ok) throw new Error(data?.error?.message || '歌词暂时无法获取');
+    renderLyrics(data.lyric, data.translatedLyric);
+    document.querySelector('.lyrics-panel .tag').textContent = data.lyric ? '已载入' : '暂无歌词';
+  } catch (error) {
+    container.className = 'lyrics-empty';
+    container.textContent = error.message || '歌词载入失败，请稍后重试。';
+    document.querySelector('.lyrics-panel .tag').textContent = '载入失败';
+  }
+}
+function selectSong(song) {
+  document.getElementById('trackTitle').textContent = song.name || '未知歌曲';
+  document.getElementById('trackArtist').textContent = (song.artists || []).join(' / ') + (song.album ? ' · ' + song.album : '');
+  document.getElementById('duration').textContent = formatDuration(song.durationMs);
+  document.querySelector('.player-panel .tag').textContent = '已选歌曲';
+  loadLyrics(song);
+}
+function renderSongResults(items) {
+  const results = document.getElementById('musicResults');
+  results.replaceChildren();
+  if (!items.length) {
+    const empty = document.createElement('div');
+    empty.className = 'music-empty';
+    const strong = document.createElement('strong');
+    strong.textContent = '没有找到匹配歌曲';
+    const small = document.createElement('small');
+    small.textContent = '试试更短的歌名或歌手名';
+    empty.append(strong, small);
+    results.append(empty);
+    return;
+  }
+  items.forEach((song) => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'music-result';
+    const copy = document.createElement('span');
+    copy.className = 'music-result-copy';
+    const title = document.createElement('strong');
+    title.textContent = song.name || '未知歌曲';
+    const meta = document.createElement('small');
+    meta.textContent = (song.artists || []).join(' / ') + (song.album ? ' · ' + song.album : '');
+    copy.append(title, meta);
+    if (song.cover) {
+      const cover = document.createElement('img');
+      cover.src = song.cover;
+      cover.alt = '';
+      cover.loading = 'lazy';
+      button.append(cover);
+    } else {
+      const cover = document.createElement('span');
+      cover.className = 'music-cover-placeholder';
+      cover.textContent = '♫';
+      button.append(cover);
+    }
+    button.append(copy);
+    const duration = document.createElement('span');
+    duration.className = 'tag';
+    duration.textContent = formatDuration(song.durationMs);
+    button.append(duration);
+    button.addEventListener('click', () => selectSong(song));
+    results.append(button);
+  });
+}
+document.getElementById('musicSearch').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const query = document.getElementById('songQuery').value.trim();
+  const caption = document.getElementById('resultCaption');
+  const count = document.getElementById('resultCount');
+  if (!query) { setMusicStatus('先输入歌曲名或歌手，再开始搜索。', true); return; }
+  const button = document.getElementById('musicSearchButton');
+  button.disabled = true;
+  button.textContent = '搜索中…';
+  caption.textContent = '正在搜索：' + query;
+  count.textContent = '…';
+  setMusicStatus('正在连接音乐服务，请稍候。');
+  document.getElementById('musicResults').textContent = '正在寻找歌曲……首次唤醒免费服务可能需要一些时间。';
+  try {
+    const response = await fetch(MUSIC_API_BASE + '/api/music/search?q=' + encodeURIComponent(query) + '&limit=20&offset=0');
+    const data = await response.json();
+    if (!response.ok || !data.ok) throw new Error(data?.error?.message || '音乐搜索暂时不可用');
+    const items = Array.isArray(data.items) ? data.items : [];
+    renderSongResults(items);
+    caption.textContent = '搜索词：' + query + ' · 共 ' + (data.total ?? items.length) + ' 条匹配';
+    count.textContent = items.length + ' 首';
+    setMusicStatus(items.length ? '已连接音乐服务，选择一首歌曲查看歌词。' : '搜索完成，没有找到匹配歌曲。');
+  } catch (error) {
+    caption.textContent = '搜索未完成';
+    count.textContent = '0 首';
+    const empty = document.createElement('div');
+    empty.className = 'music-empty';
+    const strong = document.createElement('strong');
+    strong.textContent = '暂时无法完成搜索';
+    const small = document.createElement('small');
+    small.textContent = error.message || '请稍后重试';
+    empty.append(strong, small);
+    document.getElementById('musicResults').replaceChildren(empty);
+    setMusicStatus(error.message || '音乐服务暂时不可用。', true);
+  } finally {
+    button.disabled = false;
+    button.textContent = '搜索';
+  }
 });
 </script>
 </body>
