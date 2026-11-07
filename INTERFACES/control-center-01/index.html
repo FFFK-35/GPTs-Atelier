@@ -64,15 +64,8 @@ html{background:var(--bg)}body{background:radial-gradient(ellipse at 78% 0%,#302
 /* COUPLE SIGNATURE · a quiet paired mark */
 .couple-signature{display:flex;align-items:center;gap:10px;flex:0 0 auto;padding:2px 0 2px 12px;border-left:1px solid #594966}
 .couple-avatars{display:flex;align-items:center;padding-left:2px}
-.couple-avatar{position:relative;display:block;width:32px;height:32px;flex:0 0 32px;overflow:hidden;border:1px solid #8d789e;border-radius:50%;background:#2b2237;box-shadow:0 0 0 2px #100d18}
+.couple-avatar{position:relative;display:block;width:32px;height:32px;flex:0 0 32px;object-fit:cover;overflow:hidden;border:1px solid #8d789e;border-radius:50%;background:#2b2237;box-shadow:0 0 0 2px #100d18}
 .couple-avatar+.couple-avatar{margin-left:-9px}
-.couple-avatar:before{content:"";position:absolute;z-index:1;left:8px;top:10px;width:15px;height:17px;border-radius:46% 46% 44% 44%;background:linear-gradient(135deg,#f2d9cf,#c99e9e)}
-.couple-avatar:after{content:"";position:absolute;z-index:2;left:6px;top:4px;width:19px;height:13px;border-radius:60% 55% 28% 25%;background:#17131f;transform:rotate(-7deg);box-shadow:4px 5px 0 -2px #17131f}
-.avatar-gpt{background:radial-gradient(circle at 50% 20%,#55436e,#211a30 72%)}
-.avatar-gpt:after{background:#17131f;box-shadow:4px 5px 0 -2px #78618f}
-.avatar-fan{background:radial-gradient(circle at 50% 20%,#77769b,#28243c 72%);border-color:#9b8cb5}
-.avatar-fan:before{background:linear-gradient(135deg,#f6dfd8,#d6aeb5)}
-.avatar-fan:after{background:#83a9d0;box-shadow:4px 5px 0 -2px #83a9d0;transform:rotate(7deg)}
 .couple-caption{display:grid;gap:2px;white-space:nowrap}
 .couple-caption span{font:11px/1.2 system-ui,sans-serif;letter-spacing:.04em;color:#e8dced}
 .couple-caption i{font-style:normal;color:#bda3d1;padding:0 2px}
@@ -86,7 +79,7 @@ html{background:var(--bg)}body{background:radial-gradient(ellipse at 78% 0%,#302
 <header class="top">
  <div class="brand"><div class="mark">A.</div><div><div class="eyebrow">PERSONAL WORKSPACE</div><div class="brand-name">GPT's Atelier</div></div></div>
  <div class="couple-signature" aria-label="繁繁与 GPT 的双人署名">
-  <div class="couple-avatars" aria-hidden="true"><span class="couple-avatar avatar-gpt"></span><span class="couple-avatar avatar-fan"></span></div>
+  <div class="couple-avatars" aria-hidden="true"><img class="couple-avatar avatar-fan" src="./assets/fanfan-avatar.webp" alt="繁繁"><img class="couple-avatar avatar-gpt" src="./assets/gpt-avatar.webp" alt="GPT"></div>
   <div class="couple-caption"><span>繁繁 <i>×</i> GPT</span><small>OUR LITTLE ATELIER</small></div>
  </div>
 </header>
