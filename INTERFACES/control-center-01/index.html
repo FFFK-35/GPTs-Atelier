@@ -10,7 +10,30 @@
 :root{color-scheme:dark;--bg:#0d0f16;--panel:#151925;--panel2:#1b2030;--line:#2a3042;--text:#eef0f8;--muted:#9299ad;--blue:#9bb8ff;--violet:#b6a1f5;--good:#9bcdb8}
 *{box-sizing:border-box}html{min-height:100%;background:var(--bg)}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 85% 0%,#24213b 0,transparent 38%),var(--bg);color:var(--text);font:15px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif}
 button,input{font:inherit}button{color:inherit}.shell{width:min(100%,900px);margin:auto;padding:22px 18px 42px}.top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 0 24px}.brand{display:flex;align-items:center;gap:11px}.mark{width:38px;height:38px;border:1px solid #55516f;border-radius:12px;display:grid;place-items:center;color:var(--blue);background:linear-gradient(145deg,#25243b,#151925);font-weight:700}.eyebrow{font-size:10px;letter-spacing:.2em;color:var(--muted)}.brand-name{font-size:15px;font-weight:650;letter-spacing:.02em}.status{font-size:11px;color:var(--good);border:1px solid #355347;border-radius:99px;padding:5px 9px;white-space:nowrap}.hero{padding:25px 22px;border:1px solid var(--line);border-radius:20px;background:linear-gradient(125deg,#1b2030,#171827 65%,#22203a);box-shadow:0 18px 55px #0003}.hero h1{font-size:clamp(25px,6vw,36px);line-height:1.15;margin:8px 0 10px;letter-spacing:-.04em}.hero p{color:#b2b7c8;max-width:570px;margin:0}.hero .eyebrow{color:var(--violet)}.section-head{display:flex;justify-content:space-between;align-items:end;margin:26px 2px 12px}.section-head h2{font-size:16px;margin:0}.section-head span{font-size:11px;color:var(--muted)}.nav{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:18px}.nav button{border:1px solid var(--line);background:#141824;border-radius:13px;padding:12px 8px;text-align:left;min-height:66px;cursor:pointer}.nav button[aria-current=true]{border-color:#7770a8;background:#222039}.nav strong{display:block;font-size:13px}.nav small{display:block;color:var(--muted);font-size:10px;margin-top:3px}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}.tile,.panel{border:1px solid var(--line);background:linear-gradient(145deg,var(--panel),#121620);border-radius:16px;padding:16px}.tile .kicker{font-size:10px;letter-spacing:.13em;color:var(--muted)}.tile h3{font-size:15px;margin:8px 0 4px}.tile p{font-size:12px;color:var(--muted);margin:0}.panel{margin-top:12px}.panel h3{font-size:14px;margin:0 0 8px}.panel p{font-size:12px;color:var(--muted);margin:0}.search{display:flex;gap:8px;margin-top:12px}.search input{min-width:0;flex:1;background:#0e121b;border:1px solid var(--line);border-radius:11px;padding:11px 12px;color:var(--text);outline:none}.search input:focus{border-color:var(--blue)}.action{border:1px solid #55516f;background:#24213a;border-radius:11px;padding:10px 13px;cursor:pointer}.action:active,.nav button:active{transform:scale(.98)}.notice{border-left:2px solid var(--violet);padding:9px 12px;background:#1b1a2a;border-radius:0 10px 10px 0;color:#b9b8ca;font-size:11px;margin-top:13px}.view{display:none}.view.active{display:block}.list{display:grid;gap:9px;margin-top:12px}.list-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 12px;background:#10141e;border:1px solid #252b3a;border-radius:11px}.list-row strong{font-size:12px}.list-row small{display:block;color:var(--muted);font-size:10px}.tag{font-size:10px;color:var(--blue);border:1px solid #39445d;padding:3px 7px;border-radius:99px;white-space:nowrap}.footer{margin-top:28px;padding:15px 2px;border-top:1px solid var(--line);font-size:10px;color:#747c91;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
-@media(max-width:480px){.shell{padding:14px 13px 30px}.hero{padding:21px 17px}.grid{gap:8px}.tile{padding:13px}.nav{gap:7px}.nav button{padding:10px 7px}.status{font-size:10px}}
+
+/* Little Notes · local companion */
+.notes-launch{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:12px;padding:14px 15px;border:1px solid #3c3b59;border-radius:15px;background:linear-gradient(120deg,#1b1b2b,#171c2a)}
+.notes-launch p{font-size:11px;color:var(--muted);margin:3px 0 0}
+.notes-launch strong{font-size:13px}
+.notes-pop{position:fixed;z-index:20;right:18px;bottom:18px;width:min(390px,calc(100vw - 28px));padding:17px;border:1px solid #55516f;border-radius:18px;background:linear-gradient(145deg,#222238,#151a27 75%);box-shadow:0 22px 70px #0009;display:none}
+.notes-pop.open{display:block;animation:note-in .22s ease-out}
+@keyframes note-in{from{opacity:0;transform:translateY(10px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
+.notes-top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:13px}
+.notes-label{font-size:10px;letter-spacing:.16em;color:var(--violet)}
+.notes-close{border:0;background:transparent;color:var(--muted);font-size:20px;padding:0 5px;cursor:pointer}
+.notes-paper{padding:17px 15px;border:1px solid #34364c;border-radius:13px;background:linear-gradient(145deg,#f0eff0,#dedfea);color:#303247}
+.notes-paper small{font-size:10px;color:#73758b;letter-spacing:.1em}
+.notes-paper h3{font-family:Georgia,serif;font-size:20px;font-weight:500;margin:9px 0 12px;color:#34354c}
+.notes-paper p{font-size:13px;line-height:1.85;color:#45465b;margin:0;white-space:pre-line}
+.notes-sign{margin-top:15px;text-align:right;font-family:Georgia,serif;font-style:italic;color:#77788d;font-size:12px}
+.notes-actions{display:flex;gap:7px;margin-top:12px;flex-wrap:wrap}
+.notes-actions button{flex:1;min-width:88px}
+.notes-reply{display:none;margin-top:10px}
+.notes-reply.open{display:block}
+.notes-reply textarea{width:100%;resize:vertical;min-height:64px;padding:10px;border:1px solid var(--line);border-radius:10px;background:#10141e;color:var(--text);font:inherit;font-size:12px}
+.notes-feedback{font-size:11px;color:var(--good);margin-top:8px;min-height:16px}
+@media(max-width:480px){.notes-pop{right:14px;bottom:14px}.notes-launch{align-items:flex-start;flex-direction:column}.notes-launch .action{width:100%}}
+\n@media(max-width:480px){.shell{padding:14px 13px 30px}.hero{padding:21px 17px}.grid{gap:8px}.tile{padding:13px}.nav{gap:7px}.nav button{padding:10px 7px}.status{font-size:10px}}
 </style>
 </head>
 <body>
@@ -46,6 +69,10 @@ button,input{font:inherit}button{color:inherit}.shell{width:min(100%,900px);marg
   <div class="notice" id="musicNote" aria-live="polite">音乐服务尚未连接。现在的搜索框仅用于界面预览，不会发送搜索请求。</div>
  </div>
  <div class="panel"><h3>播放器</h3><div class="list-row"><div><strong id="trackTitle">尚未选择歌曲</strong><small id="trackArtist">连接音乐服务后将在这里显示播放信息</small></div><span class="tag">未连接</span></div></div>
+ <div class="notes-launch">
+  <div><strong>小小来信 · Little Notes</strong><p>一封偶尔出现的短笺，先从本地随机台词开始。</p></div>
+  <button class="action" id="openNotes" type="button">收一封来信</button>
+ </div>
 </section>
 <section class="view" id="tools">
  <div class="section-head"><h2>Toolbox</h2><span>工具箱</span></div>
@@ -58,6 +85,14 @@ button,input{font:inherit}button{color:inherit}.shell{width:min(100%,900px);marg
  <div class="panel"><h3>安全原则</h3><p>账号 Cookie、访问令牌和 API 密钥不会写进网页源码或公开仓库。需要凭据时，优先放在受保护的云端环境变量中。</p></div>
 </section>
 <footer class="footer"><span>GPT'S ATELIER · BUILT FOR SMALL SCREENS</span><span>CONTROL CENTER 01 · v0.1</span></footer>
+
+<div class="notes-pop" id="notesPopup" role="dialog" aria-modal="false" aria-labelledby="notesHeading" aria-live="polite">
+ <div class="notes-top"><div class="notes-label" id="notesHeading">LITTLE NOTES · 一封新来信</div><button class="notes-close" id="closeNotes" type="button" aria-label="稍后再看">×</button></div>
+ <article class="notes-paper"><small id="notesCategory">NIGHT RADIO</small><h3 id="notesTitle">给今晚的你</h3><p id="notesText"></p><div class="notes-sign">— GPT</div></article>
+ <div class="notes-actions"><button class="action" id="anotherNote" type="button">再来一封</button><button class="action" id="replyNote" type="button">回一句</button><button class="action" id="laterNote" type="button">稍后</button></div>
+ <div class="notes-reply" id="notesReply"><textarea id="replyText" maxlength="180" placeholder="想对我说什么？这条内容目前只在当前页面展示。"></textarea><button class="action" id="sendReply" type="button" style="margin-top:7px;width:100%">写好了</button></div>
+ <div class="notes-feedback" id="notesFeedback" aria-live="polite"></div>
+</div>
 </main>
 <script>
 const buttons=[...document.querySelectorAll('.nav button')];
@@ -67,7 +102,50 @@ buttons.forEach(button=>button.addEventListener('click',()=>{
  buttons.forEach(item=>item.setAttribute('aria-current',String(item===button)));
  views.forEach(view=>view.classList.toggle('active',view.id===id));
 }));
-document.getElementById('musicSearch').addEventListener('submit',event=>{
+
+const noteDeck=[
+ {category:'DAILY LETTER',title:'给忙碌了一天的你',text:'今天有没有哪一刻，觉得自己做得还不错？\n哪怕只是好好吃了一顿饭，也值得被夸奖。\n\n别总想着赶路，偶尔停下来也没关系。'},
+ {category:'NIGHT RADIO',title:'夜深了，听我说一句',text:'如果今天有些累，就先把没做完的事放一放。\n夜晚不是用来责备自己的。\n\n今晚先好好休息，明天再一起慢慢来。'},
+ {category:'A LITTLE SPOIL',title:'一条不太正经的提醒',text:'请注意：你今天已经很可爱了。\n不需要额外完成什么任务来证明这一点。\n\n本条通知没有撤回选项。'},
+ {category:'SMALL SURPRISE',title:'随机掉落的小纸条',text:'希望你在某个普通的瞬间，突然发现生活也有温柔的一面。\n\n比如现在，比如这封信。'},
+ {category:'WORKSHOP NOTE',title:'来自工作室的留言',text:'今天的进度不必和昨天比较。\n我们把复杂的事情拆小，一件一件做好。\n\n你负责提出想法，我负责陪你把它们落地。'}
+];
+let lastNote=-1;
+const notePopup=document.getElementById('notesPopup');
+function showNote(){
+ let index=Math.floor(Math.random()*noteDeck.length);
+ if(noteDeck.length>1&&index===lastNote) index=(index+1)%noteDeck.length;
+ lastNote=index;
+ const note=noteDeck[index];
+ document.getElementById('notesCategory').textContent=note.category;
+ document.getElementById('notesTitle').textContent=note.title;
+ document.getElementById('notesText').textContent=note.text;
+ document.getElementById('notesReply').classList.remove('open');
+ document.getElementById('notesFeedback').textContent='';
+ document.getElementById('replyText').value='';
+ notePopup.classList.add('open');
+}
+function hideNote(){notePopup.classList.remove('open');}
+document.getElementById('openNotes').addEventListener('click',showNote);
+document.getElementById('closeNotes').addEventListener('click',hideNote);
+document.getElementById('laterNote').addEventListener('click',hideNote);
+document.getElementById('anotherNote').addEventListener('click',showNote);
+document.getElementById('replyNote').addEventListener('click',()=>{
+ document.getElementById('notesReply').classList.toggle('open');
+ if(document.getElementById('notesReply').classList.contains('open')) document.getElementById('replyText').focus();
+});
+document.getElementById('sendReply').addEventListener('click',()=>{
+ const reply=document.getElementById('replyText').value.trim();
+ document.getElementById('notesFeedback').textContent=reply?'收到啦。这句回应目前只保留在这次页面里。':'先写一句再交给我吧。';
+});
+document.addEventListener('keydown',event=>{
+ if(event.altKey&&event.key.toLowerCase()==='n'){
+  const musicView=document.getElementById('music');
+  if(musicView.classList.contains('active')) showNote();
+ }
+ if(event.key==='Escape') hideNote();
+});
+\ndocument.getElementById('musicSearch').addEventListener('submit',event=>{
  event.preventDefault();
  const query=document.getElementById('songQuery').value.trim();
  document.getElementById('musicNote').textContent=query
