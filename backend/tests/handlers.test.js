@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import health from "../api/health.js";
 import search from "../api/music/search.js";
 import lyrics from "../api/music/lyrics.js";
+import aiChat from "../api/ai/chat.js";
 
 function response() {
   return {
@@ -59,4 +60,46 @@ test("music endpoints answer CORS preflight requests", async () => {
   assert.equal(res.statusCode, 204);
   assert.equal(res.ended, true);
   assert.equal(res.headers["Access-Control-Allow-Origin"], "https://fffk-35.github.io");
+});
+
+import aiChat from "../api/ai/chat.js";
+
+test("model gateway rejects requests until server secrets are configured", async () => {
+  const old = [process.env.HCNSEC_API_KEY, process.env.HCNSEC_MODEL, process.env.ATELIER_GATEWAY_TOKEN];
+  delete process.env.HCNSEC_API_KEY;
+  delete process.env.HCNSEC_MODEL;
+  delete process.env.ATELIER_GATEWAY_TOKEN;
+  const res = response();
+  await aiChat({ method: "POST", headers: {}, body: { messages: [{ role: "user", content: "hi" }] } }, res);
+  assert.equal(res.statusCode, 503);
+  assert.equal(res.body.error.code, "GATEWAY_NOT_CONFIGURED");
+  [process.env.HCNSEC_API_KEY, process.env.HCNSEC_MODEL, process.env.ATELIER_GATEWAY_TOKEN] = old;
+});
+
+test("model gateway rejects missing private gateway token", async () => {
+  const old = [process.env.HCNSEC_API_KEY, process.env.HCNSEC_MODEL, process.env.ATELIER_GATEWAY_TOKEN];
+  process.env.HCNSEC_API_KEY = "test-provider-key";
+  process.env.HCNSEC_MODEL = "test-model";
+  process.env.ATELIER_GATEWAY_TOKEN = "test-gateway-token";
+  const res = response();
+  await aiChat({ method: "POST", headers: {}, body: { messages: [{ role: "user", content: "hi" }] } }, res);
+  assert.equal(res.statusCode, 401);
+  assert.equal(res.body.error.code, "UNAUTHORIZED");
+  [process.env.HCNSEC_API_KEY, process.env.HCNSEC_MODEL, process.env.ATELIER_GATEWAY_TOKEN] = old;
+});
+
+test("model gateway validates messages before calling upstream", async () => {
+  const old = [process.env.HCNSEC_API_KEY, process.env.HCNSEC_MODEL, process.env.ATELIER_GATEWAY_TOKEN];
+  process.env.HCNSEC_API_KEY = "test-provider-key";
+  process.env.HCNSEC_MODEL = "test-model";
+  process.env.ATELIER_GATEWAY_TOKEN = "test-gateway-token";
+  const res = response();
+  await aiChat({
+    method: "POST",
+    headers: { authorization: "Bearer test-gateway-token" },
+    body: { messages: [{ role: "system", content: "" }] }
+  }, res);
+  assert.equal(res.statusCode, 400);
+  assert.equal(res.body.error.code, "INVALID_MESSAGE");
+  [process.env.HCNSEC_API_KEY, process.env.HCNSEC_MODEL, process.env.ATELIER_GATEWAY_TOKEN] = old;
 });
