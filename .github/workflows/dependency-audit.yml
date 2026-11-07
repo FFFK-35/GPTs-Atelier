@@ -25,7 +25,7 @@ jobs:
         run: npm install --package-lock-only
       - name: Run npm security audit
         run: |
-          npm audit --json > audit-report.json || true
+          npm audit --json > audit-report.json || audit_status=$?
           node --input-type=commonjs -e '
             const report = require("./audit-report.json");
             const meta = report.metadata?.vulnerabilities ?? {};
@@ -40,10 +40,12 @@ jobs:
                 fixAvailable: item.fixAvailable
               }, null, 2));
             }
+            if ((meta.total ?? 0) > 0) process.exitCode = 1;
           '
       - name: Upload full audit report
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: npm-audit-report
           path: backend/audit-report.json
-          if-no-files-found: error
+          if-no-files-found: warn
