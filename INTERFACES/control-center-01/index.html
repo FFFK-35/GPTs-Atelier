@@ -34,6 +34,7 @@ button,input{font:inherit}button{color:inherit}.shell{width:min(100%,900px);marg
 .notes-feedback{font-size:11px;color:var(--good);margin-top:8px;min-height:16px}
 @media(max-width:480px){.notes-pop{right:14px;bottom:14px}.notes-launch{align-items:flex-start;flex-direction:column}.notes-launch .action{width:100%}}
 
+.music-search-panel .music-panel-head,.music-panel-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}.music-panel-head h3{margin:0 0 3px}.music-panel-head p{font-size:11px;color:var(--muted);margin:0}.music-state{display:flex;align-items:flex-start;gap:9px;margin-top:13px;padding:10px 12px;border-radius:10px;background:#101722;color:#aeb6c9;font-size:11px}.state-dot{width:7px;height:7px;flex:0 0 7px;margin-top:5px;border-radius:50%;background:#c7a978;box-shadow:0 0 0 3px #c7a97822}.music-results{display:grid;gap:7px;margin-top:12px}.music-empty,.lyrics-empty{padding:22px 12px;text-align:center;border:1px dashed #343b50;border-radius:12px;color:var(--muted)}.music-empty strong,.music-empty small{display:block}.music-empty strong{font-size:12px;color:#cbd0df;margin:7px 0 3px}.music-empty small{font-size:10px}.music-empty-mark{display:grid;place-items:center;width:38px;height:38px;margin:auto;border-radius:12px;background:#25243b;color:var(--blue);font-size:20px}.player-main{display:flex;align-items:center;gap:12px;margin-top:14px}.album-art{display:grid;place-items:center;width:56px;height:56px;flex:0 0 56px;border-radius:13px;background:linear-gradient(145deg,#32304d,#171c2b);border:1px solid #45415e;color:#c5b6ff;font-size:24px}.player-track{min-width:0}.player-track strong,.player-track small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.player-track strong{font-size:13px}.player-track small{font-size:10px;color:var(--muted);margin-top:4px}.progress-wrap{margin-top:16px}.progress-meta{display:flex;justify-content:space-between;color:var(--muted);font-size:10px;font-variant-numeric:tabular-nums}.progress-track{height:4px;margin-top:6px;border-radius:9px;background:#303649;overflow:hidden}.progress-track span{display:block;width:0;height:100%;background:var(--violet)}.player-controls{display:flex;justify-content:center;align-items:center;gap:22px;margin-top:14px}.player-control,.player-play{border:0;background:transparent;color:#d9dced;font-size:18px}.player-play{width:40px;height:40px;border-radius:50%;background:#302c49;color:#dcd4ff;font-size:15px}.player-controls button:disabled{opacity:.42}.player-hint{text-align:center;font-size:10px;color:var(--muted);margin:10px 0 0}.lyrics-empty{margin-top:12px;font-size:11px;line-height:1.8}.lyrics-panel{margin-bottom:12px}
 @media(max-width:480px){.shell{padding:14px 13px 30px}.hero{padding:21px 17px}.grid{gap:8px}.tile{padding:13px}.nav{gap:7px}.nav button{padding:10px 7px}.status{font-size:10px}}
 </style>
 </head>
@@ -65,11 +66,23 @@ button,input{font:inherit}button{color:inherit}.shell{width:min(100%,900px);marg
 </section>
 <section class="view" id="music">
  <div class="section-head"><h2>Music Lab</h2><span>音乐实验室</span></div>
- <div class="panel"><h3>音乐服务入口</h3><p>这里将逐步加入歌曲搜索、歌曲信息、歌词与播放控制。</p>
-  <form class="search" id="musicSearch"><input id="songQuery" type="search" placeholder="输入歌曲名或歌手（界面演示）" aria-label="歌曲搜索词"><button class="action" type="submit">搜索</button></form>
-  <div class="notice" id="musicNote" aria-live="polite">音乐服务尚未连接。现在的搜索框仅用于界面预览，不会发送搜索请求。</div>
+ <div class="panel music-search-panel">
+  <div class="music-panel-head"><div><h3>发现音乐</h3><p>搜索歌曲、歌手或专辑，找到想听的那一首。</p></div><span class="tag">SEARCH</span></div>
+  <form class="search" id="musicSearch"><input id="songQuery" type="search" maxlength="80" placeholder="输入歌曲名 / 歌手名" aria-label="歌曲搜索词"><button class="action" id="musicSearchButton" type="submit">搜索</button></form>
+  <div class="music-state" id="musicNote" role="status" aria-live="polite"><span class="state-dot"></span><span>音乐服务尚未连接。搜索接口部署完成后，这里会显示真实结果。</span></div>
  </div>
- <div class="panel"><h3>播放器</h3><div class="list-row"><div><strong id="trackTitle">尚未选择歌曲</strong><small id="trackArtist">连接音乐服务后将在这里显示播放信息</small></div><span class="tag">未连接</span></div></div>
+ <div class="panel">
+  <div class="music-panel-head"><div><h3>搜索结果</h3><p id="resultCaption">等待搜索</p></div><span class="tag" id="resultCount">0 首</span></div>
+  <div id="musicResults" class="music-results"><div class="music-empty"><span class="music-empty-mark">♫</span><strong>让一首歌开始今天</strong><small>搜索结果会出现在这里</small></div></div>
+ </div>
+ <div class="panel player-panel">
+  <div class="music-panel-head"><div><h3>正在播放</h3><p>PLAYER</p></div><span class="tag">待连接</span></div>
+  <div class="player-main"><div class="album-art">♫</div><div class="player-track"><strong id="trackTitle">尚未选择歌曲</strong><small id="trackArtist">选择搜索结果后显示歌曲信息</small></div></div>
+  <div class="progress-wrap"><div class="progress-meta"><span id="currentTime">00:00</span><span id="duration">00:00</span></div><div class="progress-track"><span></span></div></div>
+  <div class="player-controls"><button class="player-control" type="button" disabled aria-label="上一首">|◀</button><button class="player-play" type="button" disabled aria-label="播放">▶</button><button class="player-control" type="button" disabled aria-label="下一首">▶|</button></div>
+  <p class="player-hint">播放控制将在获得合法可用的音频来源后启用。</p>
+ </div>
+ <div class="panel lyrics-panel"><div class="music-panel-head"><div><h3>歌词</h3><p>LYRICS</p></div><span class="tag">未载入</span></div><div id="lyricsContent" class="lyrics-empty">选择歌曲后，这里将展示对应歌词。</div></div>
  <div class="notes-launch">
   <div><strong>小小来信 · Little Notes</strong><p>一封偶尔出现的短笺，先从本地随机台词开始。</p></div>
   <button class="action" id="openNotes" type="button">收一封来信</button>
@@ -150,9 +163,14 @@ document.addEventListener('keydown',event=>{
 document.getElementById('musicSearch').addEventListener('submit',event=>{
  event.preventDefault();
  const query=document.getElementById('songQuery').value.trim();
- document.getElementById('musicNote').textContent=query
-  ? '已收到“'+query+'”。音乐服务还未连接，因此暂时不会发起真实搜索。'
-  : '先输入歌曲名或歌手吧。当前搜索框仅用于界面预览。';
+ const note=document.getElementById('musicNote');
+ const caption=document.getElementById('resultCaption');
+ const results=document.getElementById('musicResults');
+ if(!query){note.lastElementChild.textContent='先输入歌曲名或歌手，再开始搜索。';return;}
+ caption.textContent='搜索词：'+query;
+ document.getElementById('resultCount').textContent='0 首';
+ results.innerHTML='<div class="music-empty"><span class="music-empty-mark">♫</span><strong>搜索服务尚未接通</strong><small>界面已准备好，等待后端上线后显示真实歌曲</small></div>';
+ note.lastElementChild.textContent='已记录搜索词“'+query+'”。目前后端尚未部署，因此没有向网易云发送请求。';
 });
 </script>
 </body>
