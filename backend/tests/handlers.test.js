@@ -62,7 +62,6 @@ test("music endpoints answer CORS preflight requests", async () => {
   assert.equal(res.headers["Access-Control-Allow-Origin"], "https://fffk-35.github.io");
 });
 
-import aiChat from "../api/ai/chat.js";
 
 test("model gateway rejects requests until server secrets are configured", async () => {
   const old = [process.env.HCNSEC_API_KEY, process.env.HCNSEC_MODEL, process.env.ATELIER_GATEWAY_TOKEN];
