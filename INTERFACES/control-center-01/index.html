@@ -72,6 +72,17 @@ html{background:var(--bg)}body{background:radial-gradient(ellipse at 78% 0%,#302
 .couple-caption small{font:7px/1.2 system-ui,sans-serif;letter-spacing:.13em;color:#9889a3}
 @media(max-width:390px){.couple-signature{gap:7px;padding-left:8px}.couple-avatar{width:28px;height:28px;flex-basis:28px}.couple-caption span{font-size:10px}.couple-caption small{font-size:6px}.brand{gap:8px}.brand-name{font-size:12px}.mark{width:31px;height:31px}}
 
+
+/* Music Library · browser-local favorites */
+.music-result-row{display:flex;align-items:center;gap:8px;border-bottom:1px solid #393047}
+.music-result-row .music-result{flex:1;min-width:0;border:0}
+.music-favorite-toggle{flex:0 0 auto;border:1px solid #665477;background:transparent;color:#d8c4eb;padding:8px 10px;font:9px system-ui,sans-serif;letter-spacing:.06em;cursor:pointer}
+.music-favorite-toggle[aria-pressed="true"]{background:#2b2237;border-color:#9b83b0;color:#f0e7f5}
+.music-library-empty{padding:20px 4px;text-align:center;color:#a99fb1;font:11px/1.9 system-ui,sans-serif;border-top:1px solid #393047}
+.music-library-empty strong{display:block;color:#e8dfee;font:18px Georgia,serif;margin-bottom:4px}
+.music-library-note{font:9px/1.7 system-ui,sans-serif;color:#92869b;margin-top:10px}
+@media(max-width:420px){.music-result-row{gap:5px}.music-favorite-toggle{padding:8px 7px;font-size:8px}}
+
 </style>
 </head>
 <body>
@@ -113,6 +124,11 @@ html{background:var(--bg)}body{background:radial-gradient(ellipse at 78% 0%,#302
  <div class="panel">
   <div class="music-panel-head"><div><h3>搜索结果</h3><p id="resultCaption">等待搜索</p></div><span class="tag" id="resultCount">0 首</span></div>
   <div id="musicResults" class="music-results"><div class="music-empty"><span class="music-empty-mark">♫</span><strong>让一首歌开始今天</strong><small>搜索结果会出现在这里</small></div></div>
+ </div>
+ <div class="panel music-library-panel">
+  <div class="music-panel-head"><div><h3>我的收藏</h3><p>MY MUSIC LIBRARY</p></div><span class="tag" id="favoriteCount">0 首</span></div>
+  <div id="favoriteResults" class="music-results"><div class="music-library-empty"><strong>留住喜欢的旋律</strong>在搜索结果里点「收藏」，歌曲就会放进这里。</div></div>
+  <p class="music-library-note">收藏只保存在当前浏览器，不会上传账号或同步到其他设备。</p>
  </div>
  <div class="panel player-panel">
   <div class="music-panel-head"><div><h3>正在播放</h3><p>PLAYER</p></div><span class="tag">待连接</span></div>
@@ -295,9 +311,128 @@ function selectSong(song) {
   }
   loadLyrics(song);
 }
+function normalizeFavoriteSong(song) {
+  if (!song || !/^\d{1,20}$/.test(String(song.id || ''))) return null;
+  return {
+    id: String(song.id),
+    name: String(song.name || '未知歌曲').slice(0, 160),
+    artists: Array.isArray(song.artists) ? song.artists.map((item) => String(item).slice(0, 80)).slice(0, 8) : [],
+    album: String(song.album || '').slice(0, 160),
+    cover: typeof song.cover === 'string' && /^https:\/\//i.test(song.cover) ? song.cover : null,
+    durationMs: Number.isFinite(Number(song.durationMs)) ? Number(song.durationMs) : null,
+    source: 'netease'
+  };
+}
+const FAVORITES_STORAGE_KEY = 'atelier.music.favorites.v1';
+function readFavoriteSongs() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(FAVORITES_STORAGE_KEY) || '[]');
+    return Array.isArray(saved) ? saved.map(normalizeFavoriteSong).filter(Boolean).slice(0, 200) : [];
+  } catch { return []; }
+}
+let favoriteSongs = readFavoriteSongs();
+function persistFavoriteSongs() {
+  try {
+    localStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify(favoriteSongs));
+    return true;
+  } catch {
+    setMusicStatus('浏览器没有允许保存本地收藏，请检查存储空间或隐私设置。', true);
+    return false;
+  }
+}
+function isFavorite(song) {
+  return favoriteSongs.some((item) => item.id === String(song.id));
+}
+function makeSongSelectButton(song) {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'music-result';
+  const copy = document.createElement('span');
+  copy.className = 'music-result-copy';
+  const title = document.createElement('strong');
+  title.textContent = song.name || '未知歌曲';
+  const meta = document.createElement('small');
+  meta.textContent = (song.artists || []).join(' / ') + (song.album ? ' · ' + song.album : '');
+  copy.append(title, meta);
+  if (song.cover) {
+    const cover = document.createElement('img');
+    cover.src = song.cover;
+    cover.alt = '';
+    cover.loading = 'lazy';
+    button.append(cover);
+  } else {
+    const cover = document.createElement('span');
+    cover.className = 'music-cover-placeholder';
+    cover.textContent = '♫';
+    button.append(cover);
+  }
+  button.append(copy);
+  const duration = document.createElement('span');
+  duration.className = 'tag';
+  duration.textContent = formatDuration(song.durationMs);
+  button.append(duration);
+  button.addEventListener('click', () => selectSong(song));
+  return button;
+}
+function renderFavorites() {
+  const results = document.getElementById('favoriteResults');
+  const count = document.getElementById('favoriteCount');
+  if (!results || !count) return;
+  count.textContent = favoriteSongs.length + ' 首';
+  results.replaceChildren();
+  if (!favoriteSongs.length) {
+    const empty = document.createElement('div');
+    empty.className = 'music-library-empty';
+    const strong = document.createElement('strong');
+    strong.textContent = '留住喜欢的旋律';
+    empty.append(strong, document.createTextNode('在搜索结果里点「收藏」，歌曲就会放进这里。'));
+    results.append(empty);
+    return;
+  }
+  favoriteSongs.forEach((song) => {
+    const row = document.createElement('div');
+    row.className = 'music-result-row';
+    row.append(makeSongSelectButton(song));
+    const remove = document.createElement('button');
+    remove.type = 'button';
+    remove.className = 'music-favorite-toggle';
+    remove.textContent = '移除';
+    remove.setAttribute('aria-label', '从收藏中移除 ' + song.name);
+    remove.addEventListener('click', () => {
+      favoriteSongs = favoriteSongs.filter((item) => item.id !== song.id);
+      persistFavoriteSongs();
+      renderFavorites();
+      renderSongResults(window.__atelierLastMusicResults || []);
+    });
+    row.append(remove);
+    results.append(row);
+  });
+}
+function toggleFavorite(song) {
+  const normalized = normalizeFavoriteSong(song);
+  if (!normalized) {
+    setMusicStatus('这首歌曲缺少有效编号，暂时不能收藏。', true);
+    return;
+  }
+  if (isFavorite(normalized)) {
+    favoriteSongs = favoriteSongs.filter((item) => item.id !== normalized.id);
+  } else {
+    if (favoriteSongs.length >= 200) {
+      setMusicStatus('本地收藏已达到 200 首上限，先移除几首再收藏吧。', true);
+      return;
+    }
+    favoriteSongs = [normalized, ...favoriteSongs];
+  }
+  if (persistFavoriteSongs()) {
+    setMusicStatus(isFavorite(normalized) ? '已加入本地收藏。' : '已从本地收藏移除。');
+  }
+  renderFavorites();
+  renderSongResults(window.__atelierLastMusicResults || []);
+}
 function renderSongResults(items) {
   const results = document.getElementById('musicResults');
   results.replaceChildren();
+  window.__atelierLastMusicResults = items;
   if (!items.length) {
     const empty = document.createElement('div');
     empty.className = 'music-empty';
@@ -310,37 +445,21 @@ function renderSongResults(items) {
     return;
   }
   items.forEach((song) => {
-    const button = document.createElement('button');
-    button.type = 'button';
-    button.className = 'music-result';
-    const copy = document.createElement('span');
-    copy.className = 'music-result-copy';
-    const title = document.createElement('strong');
-    title.textContent = song.name || '未知歌曲';
-    const meta = document.createElement('small');
-    meta.textContent = (song.artists || []).join(' / ') + (song.album ? ' · ' + song.album : '');
-    copy.append(title, meta);
-    if (song.cover) {
-      const cover = document.createElement('img');
-      cover.src = song.cover;
-      cover.alt = '';
-      cover.loading = 'lazy';
-      button.append(cover);
-    } else {
-      const cover = document.createElement('span');
-      cover.className = 'music-cover-placeholder';
-      cover.textContent = '♫';
-      button.append(cover);
-    }
-    button.append(copy);
-    const duration = document.createElement('span');
-    duration.className = 'tag';
-    duration.textContent = formatDuration(song.durationMs);
-    button.append(duration);
-    button.addEventListener('click', () => selectSong(song));
-    results.append(button);
+    const row = document.createElement('div');
+    row.className = 'music-result-row';
+    row.append(makeSongSelectButton(song));
+    const favorite = document.createElement('button');
+    favorite.type = 'button';
+    favorite.className = 'music-favorite-toggle';
+    favorite.setAttribute('aria-pressed', String(isFavorite(song)));
+    favorite.textContent = isFavorite(song) ? '已收藏' : '+ 收藏';
+    favorite.setAttribute('aria-label', (isFavorite(song) ? '取消收藏 ' : '收藏 ') + (song.name || '歌曲'));
+    favorite.addEventListener('click', () => toggleFavorite(song));
+    row.append(favorite);
+    results.append(row);
   });
 }
+renderFavorites();
 document.getElementById('musicSearch').addEventListener('submit', async (event) => {
   event.preventDefault();
   const query = document.getElementById('songQuery').value.trim();
