@@ -38,6 +38,12 @@ for (const id of ["renameChat", "exportChat", "deleteChat"]) {
   assert.ok(chat.includes('id="' + id + '"'), `Missing local conversation action: ${id}`);
 }
 assert.ok(chat.includes("URL.createObjectURL"), "Conversation export must create a local text download");
+assert.ok(chat.includes('id="importChat"'), "Chat Studio must expose a TXT import action");
+assert.ok(chat.includes('id="importFile"'), "Chat Studio must provide a local TXT file picker");
+assert.ok(chat.includes("parseExportedText"), "TXT import must parse exported conversation files");
+assert.ok(check.includes("MAX_IMPORT_BYTES"), "TXT import must enforce a file-size limit");
+assert.ok(chat.includes("file.text()"), "TXT import must read the selected file locally");
+
 assert.ok(chat.includes("chats.filter(item=>item.id!==c.id)"), "Conversation deletion must remove only the active local chat");
 assert.ok(!/fetch\s*\(/i.test(chat), "Phase 1 frontend must not call remote APIs");
 assert.ok(
