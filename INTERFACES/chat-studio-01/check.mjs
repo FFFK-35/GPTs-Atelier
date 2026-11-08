@@ -46,4 +46,8 @@ assert.ok(
 );
 
 inspectHtml(controlPath, ['data-view="chat"', 'id="chat"', "../chat-studio-01/"]);
+
+const readme = readFileSync(resolve(here, "README.md"), "utf8");
+assert.ok(!readme.includes("\\n"), "README must use real line breaks, not escaped newline text");
+
 console.log("Chat Studio static checks passed.");
