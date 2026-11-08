@@ -34,6 +34,20 @@ function restoreEnv(saved) {
   }
 }
 
+async function withConfiguredGateway(run) {
+  const names = ["HCNSEC_API_KEY", "HCNSEC_MODEL", "ATELIER_SESSION_SECRET"];
+  const saved = saveEnv(names);
+  process.env.HCNSEC_API_KEY = "test-provider-key";
+  process.env.HCNSEC_MODEL = "test-model";
+  process.env.ATELIER_SESSION_SECRET = testSecret;
+  try {
+    const token = issueSessionToken(testSecret);
+    await run(token);
+  } finally {
+    restoreEnv(saved);
+  }
+}
+
 test("health endpoint reports ready", () => {
   const res = response();
   health({ method: "GET" }, res);
@@ -82,35 +96,44 @@ test("session endpoint rejects requests from unknown origins", async () => {
   const saved = saveEnv(["ATELIER_ACCESS_PASSWORD", "ATELIER_SESSION_SECRET"]);
   process.env.ATELIER_ACCESS_PASSWORD = "a-private-workspace-password";
   process.env.ATELIER_SESSION_SECRET = testSecret;
-  const res = response();
-  await authSession({ method: "POST", headers: { origin: "https://evil.example" }, body: { password: "a-private-workspace-password" } }, res);
-  assert.equal(res.statusCode, 403);
-  assert.equal(res.body.error.code, "ORIGIN_NOT_ALLOWED");
-  restoreEnv(saved);
+  try {
+    const res = response();
+    await authSession({ method: "POST", headers: { origin: "https://evil.example" }, body: { password: "a-private-workspace-password" } }, res);
+    assert.equal(res.statusCode, 403);
+    assert.equal(res.body.error.code, "ORIGIN_NOT_ALLOWED");
+  } finally {
+    restoreEnv(saved);
+  }
 });
 
 test("session endpoint exchanges the correct password for a signed session", async () => {
   const saved = saveEnv(["ATELIER_ACCESS_PASSWORD", "ATELIER_SESSION_SECRET"]);
   process.env.ATELIER_ACCESS_PASSWORD = "a-private-workspace-password";
   process.env.ATELIER_SESSION_SECRET = testSecret;
-  const res = response();
-  await authSession({ method: "POST", headers: { origin: allowedOrigin }, body: { password: "a-private-workspace-password" } }, res);
-  assert.equal(res.statusCode, 200);
-  assert.equal(res.body.ok, true);
-  assert.equal(verifySessionToken(res.body.token, testSecret), true);
-  assert.equal(res.body.expiresIn, 28800);
-  restoreEnv(saved);
+  try {
+    const res = response();
+    await authSession({ method: "POST", headers: { origin: allowedOrigin }, body: { password: "a-private-workspace-password" } }, res);
+    assert.equal(res.statusCode, 200);
+    assert.equal(res.body.ok, true);
+    assert.equal(verifySessionToken(res.body.token, testSecret), true);
+    assert.equal(res.body.expiresIn, 28800);
+  } finally {
+    restoreEnv(saved);
+  }
 });
 
 test("session endpoint rejects an incorrect password", async () => {
   const saved = saveEnv(["ATELIER_ACCESS_PASSWORD", "ATELIER_SESSION_SECRET"]);
   process.env.ATELIER_ACCESS_PASSWORD = "a-private-workspace-password";
   process.env.ATELIER_SESSION_SECRET = testSecret;
-  const res = response();
-  await authSession({ method: "POST", headers: { origin: allowedOrigin }, body: { password: "wrong-password" } }, res);
-  assert.equal(res.statusCode, 401);
-  assert.equal(res.body.error.code, "INVALID_PASSWORD");
-  restoreEnv(saved);
+  try {
+    const res = response();
+    await authSession({ method: "POST", headers: { origin: allowedOrigin }, body: { password: "wrong-password" } }, res);
+    assert.equal(res.statusCode, 401);
+    assert.equal(res.body.error.code, "INVALID_PASSWORD");
+  } finally {
+    restoreEnv(saved);
+  }
 });
 
 test("session tokens expire and cannot be tampered with", () => {
@@ -126,38 +149,95 @@ test("model gateway rejects requests until server secrets are configured", async
   delete process.env.HCNSEC_API_KEY;
   delete process.env.HCNSEC_MODEL;
   delete process.env.ATELIER_SESSION_SECRET;
-  const res = response();
-  await aiChat({ method: "POST", headers: { origin: allowedOrigin }, body: { messages: [{ role: "user", content: "hi" }] } }, res);
-  assert.equal(res.statusCode, 503);
-  assert.equal(res.body.error.code, "GATEWAY_NOT_CONFIGURED");
-  restoreEnv(saved);
+  try {
+    const res = response();
+    await aiChat({ method: "POST", headers: { origin: allowedOrigin }, body: { messages: [{ role: "user", content: "hi" }] } }, res);
+    assert.equal(res.statusCode, 503);
+    assert.equal(res.body.error.code, "GATEWAY_NOT_CONFIGURED");
+  } finally {
+    restoreEnv(saved);
+  }
 });
 
 test("model gateway rejects missing or invalid session token", async () => {
-  const saved = saveEnv(["HCNSEC_API_KEY", "HCNSEC_MODEL", "ATELIER_SESSION_SECRET"]);
-  process.env.HCNSEC_API_KEY = "test-provider-key";
-  process.env.HCNSEC_MODEL = "test-model";
-  process.env.ATELIER_SESSION_SECRET = testSecret;
-  const res = response();
-  await aiChat({ method: "POST", headers: { origin: allowedOrigin }, body: { messages: [{ role: "user", content: "hi" }] } }, res);
-  assert.equal(res.statusCode, 401);
-  assert.equal(res.body.error.code, "UNAUTHORIZED");
-  restoreEnv(saved);
+  await withConfiguredGateway(async () => {
+    const res = response();
+    await aiChat({ method: "POST", headers: { origin: allowedOrigin }, body: { messages: [{ role: "user", content: "hi" }] } }, res);
+    assert.equal(res.statusCode, 401);
+    assert.equal(res.body.error.code, "UNAUTHORIZED");
+  });
 });
 
 test("model gateway validates messages before calling upstream", async () => {
-  const saved = saveEnv(["HCNSEC_API_KEY", "HCNSEC_MODEL", "ATELIER_SESSION_SECRET"]);
-  process.env.HCNSEC_API_KEY = "test-provider-key";
-  process.env.HCNSEC_MODEL = "test-model";
-  process.env.ATELIER_SESSION_SECRET = testSecret;
-  const token = issueSessionToken(testSecret);
+  await withConfiguredGateway(async (token) => {
+    const res = response();
+    await aiChat({
+      method: "POST",
+      headers: { origin: allowedOrigin, authorization: `Bearer ${token}` },
+      body: { messages: [{ role: "system", content: "" }] }
+    }, res);
+    assert.equal(res.statusCode, 400);
+    assert.equal(res.body.error.code, "INVALID_MESSAGE");
+  });
+});
+
+test("model gateway answers preflight without exposing provider credentials", async () => {
   const res = response();
-  await aiChat({
-    method: "POST",
-    headers: { origin: allowedOrigin, authorization: `Bearer ${token}` },
-    body: { messages: [{ role: "system", content: "" }] }
-  }, res);
-  assert.equal(res.statusCode, 400);
-  assert.equal(res.body.error.code, "INVALID_MESSAGE");
-  restoreEnv(saved);
+  await aiChat({ method: "OPTIONS", headers: { origin: allowedOrigin } }, res);
+  assert.equal(res.statusCode, 204);
+  assert.equal(res.ended, true);
+  assert.equal(res.headers["Access-Control-Allow-Origin"], allowedOrigin);
+  assert.match(res.headers["Access-Control-Allow-Headers"], /Authorization/);
+});
+
+test("model gateway rejects more than 20 messages", async () => {
+  await withConfiguredGateway(async (token) => {
+    const res = response();
+    await aiChat({
+      method: "POST",
+      headers: { origin: allowedOrigin, authorization: `Bearer ${token}` },
+      body: { messages: Array.from({ length: 21 }, () => ({ role: "user", content: "hi" })) }
+    }, res);
+    assert.equal(res.statusCode, 400);
+    assert.equal(res.body.error.code, "INVALID_MESSAGES");
+  });
+});
+
+test("model gateway rejects input over 12000 characters", async () => {
+  await withConfiguredGateway(async (token) => {
+    const res = response();
+    await aiChat({
+      method: "POST",
+      headers: { origin: allowedOrigin, authorization: `Bearer ${token}` },
+      body: { messages: [{ role: "user", content: "x".repeat(12001) }] }
+    }, res);
+    assert.equal(res.statusCode, 400);
+    assert.equal(res.body.error.code, "INPUT_TOO_LONG");
+  });
+});
+
+test("model gateway rejects an out-of-range temperature", async () => {
+  await withConfiguredGateway(async (token) => {
+    const res = response();
+    await aiChat({
+      method: "POST",
+      headers: { origin: allowedOrigin, authorization: `Bearer ${token}` },
+      body: { messages: [{ role: "user", content: "hello" }], temperature: 2.1 }
+    }, res);
+    assert.equal(res.statusCode, 400);
+    assert.equal(res.body.error.code, "INVALID_TEMPERATURE");
+  });
+});
+
+test("model gateway rejects max_tokens above the configured ceiling", async () => {
+  await withConfiguredGateway(async (token) => {
+    const res = response();
+    await aiChat({
+      method: "POST",
+      headers: { origin: allowedOrigin, authorization: `Bearer ${token}` },
+      body: { messages: [{ role: "user", content: "hello" }], max_tokens: 1201 }
+    }, res);
+    assert.equal(res.statusCode, 400);
+    assert.equal(res.body.error.code, "INVALID_MAX_TOKENS");
+  });
 });
