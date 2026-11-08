@@ -12,7 +12,7 @@ Open `index.html` in a modern browser, or serve the repository with any static f
 
 - Responsive chat workspace with a mobile drawer sidebar.
 - New conversations, local conversation history, and per-chat rename/delete actions.
-- Export the current conversation as a plain-text file.
+- Export the current conversation as a plain-text file and import Chat Studio TXT exports as separate conversations (up to 1 MB / 200 messages).
 - Message rendering using text nodes (no HTML injection).
 - Composer with Enter-to-send and Shift+Enter for a new line.
 - Dark/light theme preference.
