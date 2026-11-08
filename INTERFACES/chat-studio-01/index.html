@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#100d18">
+<meta name="description" content="GPT's Atelier · Chat Studio">
+<title>Chat Studio — GPT's Atelier</title>
+<style>
+:root{color-scheme:dark;--bg:#100d18;--side:#15111e;--panel:#1b1625;--panel2:#211a2d;--line:#3b3047;--text:#f1ebf6;--muted:#a69aaf;--soft:#c9bbd5;--accent:#c9afe2;--accent2:#a88ac6;--user:#30243b;--shadow:0 20px 70px #0005}
+:root[data-theme="light"]{color-scheme:light;--bg:#f4f0f5;--side:#eee8f1;--panel:#fffaff;--panel2:#f3edf6;--line:#ded2e4;--text:#30263a;--muted:#807487;--soft:#65586f;--accent:#77558f;--accent2:#9474a9;--user:#eee4f4;--shadow:0 18px 55px #4a315012}
+*{box-sizing:border-box}html,body{height:100%;margin:0}body{background:var(--bg);color:var(--text);font:14px/1.55 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI","Noto Sans SC",sans-serif;overflow:hidden}button,textarea{font:inherit}button{color:inherit;cursor:pointer}.app{display:grid;grid-template-columns:276px minmax(0,1fr);height:100dvh;min-height:0}.sidebar{display:flex;flex-direction:column;min-width:0;background:var(--side);border-right:1px solid var(--line);padding:20px 15px calc(16px + env(safe-area-inset-bottom))}.brand{display:flex;align-items:center;gap:11px;padding:4px 7px 22px}.brand-mark{width:35px;height:35px;border:1px solid var(--accent2);border-radius:50%;display:grid;place-items:center;color:var(--accent);font:italic 18px Georgia}.brand-copy strong{display:block;font-size:12px;letter-spacing:.11em}.brand-copy small{display:block;color:var(--muted);font-size:9px;letter-spacing:.17em;margin-top:2px}.new-chat{display:flex;align-items:center;gap:10px;width:100%;padding:12px 13px;border:1px solid var(--line);border-radius:10px;background:var(--panel);text-align:left;font-size:12px}.new-chat b{font-size:18px;font-weight:400;color:var(--accent)}.side-label{margin:24px 8px 9px;color:var(--muted);font-size:9px;letter-spacing:.18em}.history{display:grid;gap:4px;overflow:auto;min-height:0}.history-item{display:flex;align-items:center;gap:9px;width:100%;padding:10px 9px;border:1px solid transparent;border-radius:8px;background:transparent;text-align:left;color:var(--soft);font-size:11px}.history-item.active{background:var(--panel2);border-color:var(--line);color:var(--text)}.history-item span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.history-item i{width:6px;height:6px;border:1px solid var(--accent2);border-radius:50%;flex:0 0 auto}.side-bottom{margin-top:auto;padding-top:14px;border-top:1px solid var(--line)}.side-link{display:flex;align-items:center;justify-content:space-between;width:100%;padding:10px 8px;border:0;background:transparent;color:var(--muted);text-align:left;font-size:11px}.side-link:hover,.history-item:hover{color:var(--text);background:var(--panel2)}.side-link small{font-size:9px}.main{display:flex;flex-direction:column;min-width:0;min-height:0;background:radial-gradient(ellipse at 75% 0%,color-mix(in srgb,var(--accent2) 10%,transparent),transparent 36%),var(--bg)}.topbar{height:65px;flex:0 0 65px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 25px;border-bottom:1px solid var(--line)}.top-left{display:flex;align-items:center;gap:12px;min-width:0}.menu-btn{display:none;width:36px;height:36px;border:1px solid var(--line);border-radius:9px;background:var(--panel)}.page-title{font:20px Georgia,serif;letter-spacing:-.02em}.page-sub{font-size:9px;letter-spacing:.16em;color:var(--muted);margin-top:2px}.top-actions{display:flex;align-items:center;gap:8px}.status{display:flex;align-items:center;gap:7px;padding:6px 9px;border:1px solid var(--line);border-radius:30px;color:var(--muted);font-size:9px;white-space:nowrap}.status:before{content:"";width:6px;height:6px;border-radius:50%;background:#c6a36f}.icon-btn{width:35px;height:35px;border:1px solid var(--line);border-radius:9px;background:var(--panel);color:var(--soft)}.chat-scroll{flex:1;min-height:0;overflow:auto;padding:38px 22px 22px}.conversation{width:min(100%,790px);margin:0 auto}.welcome{padding:8vh 0 30px;text-align:center}.welcome-kicker{font-size:9px;letter-spacing:.25em;color:var(--accent)}.welcome h1{margin:16px 0 10px;font:400 clamp(34px,5vw,53px)/1.08 Georgia,"Noto Serif SC",serif;letter-spacing:-.05em}.welcome p{max-width:430px;margin:0 auto;color:var(--muted);font-size:12px;line-height:1.9}.welcome-rule{width:45px;height:1px;margin:26px auto;background:var(--accent2)}.suggestions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;max-width:600px;margin:0 auto}.suggestion{padding:14px 15px;border:1px solid var(--line);border-radius:10px;background:color-mix(in srgb,var(--panel) 78%,transparent);text-align:left}.suggestion strong{display:block;font-size:11px;font-weight:550}.suggestion small{display:block;margin-top:4px;color:var(--muted);font-size:10px}.messages{display:grid;gap:23px;padding:12px 0 35px}.message{display:grid;grid-template-columns:29px minmax(0,1fr);gap:12px;align-items:start}.avatar{width:28px;height:28px;border:1px solid var(--line);border-radius:50%;display:grid;place-items:center;color:var(--accent);font:italic 14px Georgia}.message.user .avatar{background:var(--user);color:var(--soft)}.message-body{min-width:0;padding-top:3px}.message-meta{display:flex;align-items:center;gap:9px;margin-bottom:6px}.message-meta strong{font-size:10px;font-weight:600;letter-spacing:.05em}.message-meta small{font-size:9px;color:var(--muted)}.message-text{white-space:pre-wrap;overflow-wrap:anywhere;font-size:13px;line-height:1.85;color:var(--text)}.message.user .message-text{display:inline-block;padding:10px 13px;border:1px solid var(--line);border-radius:4px 13px 13px 13px;background:var(--user)}.preview-note{margin-top:10px;padding:10px 12px;border-left:2px solid var(--accent2);background:var(--panel);color:var(--muted);font-size:10px;line-height:1.8}.composer-wrap{flex:0 0 auto;padding:12px 22px calc(14px + env(safe-area-inset-bottom));background:linear-gradient(180deg,transparent,var(--bg) 22%)}.composer{width:min(100%,790px);margin:0 auto;border:1px solid var(--line);border-radius:14px;background:var(--panel);box-shadow:var(--shadow);padding:11px 12px 9px}.composer textarea{display:block;width:100%;min-height:50px;max-height:170px;resize:none;border:0;outline:0;background:transparent;color:var(--text);font:13px/1.7 inherit;padding:3px 4px}.composer textarea::placeholder{color:var(--muted)}.composer-bottom{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-top:6px}.composer-tools{display:flex;align-items:center;gap:6px}.tool-btn{padding:6px 8px;border:1px solid transparent;border-radius:7px;background:transparent;color:var(--muted);font-size:9px}.tool-btn:disabled{opacity:.45;cursor:not-allowed}.send-btn{width:34px;height:34px;border:0;border-radius:9px;background:var(--accent);color:#24192d;font-size:16px}.send-btn:disabled{opacity:.4;cursor:not-allowed}.footnote{width:min(100%,790px);margin:8px auto 0;text-align:center;color:var(--muted);font-size:9px}.backdrop{display:none}
+@media(max-width:760px){.app{grid-template-columns:minmax(0,1fr)}.sidebar{position:fixed;z-index:20;inset:0 auto 0 0;width:min(300px,84vw);transform:translateX(-102%);transition:transform .22s ease;box-shadow:var(--shadow)}.sidebar.open{transform:translateX(0)}.backdrop.show{display:block;position:fixed;z-index:19;inset:0;background:#08060dcc}.menu-btn{display:inline-grid;place-items:center}.topbar{height:59px;flex-basis:59px;padding:0 13px}.page-title{font-size:18px}.status{font-size:8px;padding:5px 7px}.chat-scroll{padding:20px 15px 12px}.welcome{padding:7vh 0 22px}.welcome h1{font-size:39px}.suggestions{grid-template-columns:1fr;gap:8px}.suggestion{padding:12px}.composer-wrap{padding:8px 12px calc(10px + env(safe-area-inset-bottom))}.composer{padding:9px 10px 7px}.composer textarea{min-height:46px}.footnote{font-size:8px}.top-actions{gap:5px}}
+@media(max-width:360px){.status{max-width:108px;overflow:hidden}.page-sub{font-size:8px}.chat-scroll{padding-inline:12px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="sidebar" id="sidebar" aria-label="聊天侧边栏">
+ <div class="brand"><div class="brand-mark">A</div><div class="brand-copy"><strong>GPT'S ATELIER</strong><small>PRIVATE WORKSPACE</small></div></div>
+ <button class="new-chat" id="newChat"><b>＋</b> 开始新对话</button>
+ <div class="side-label">RECENT CONVERSATIONS</div>
+ <div class="history" id="history"></div>
+ <div class="side-bottom">
+  <button class="side-link" id="backHome">返回工作室首页 <small>↗</small></button>
+  <button class="side-link" id="themeSide">外观主题 <small id="themeLabel">深色</small></button>
+  <button class="side-link" id="clearHistory">清空本机记录 <small>LOCAL</small></button>
+ </div>
+</aside>
+<div class="backdrop" id="backdrop"></div>
+<main class="main">
+ <header class="topbar">
+  <div class="top-left">
+   <button class="menu-btn" id="menuBtn" aria-label="打开侧边栏">☰</button>
+   <div><div class="page-title">Chat Studio</div><div class="page-sub">A PRIVATE SPACE FOR THOUGHTS</div></div>
+  </div>
+  <div class="top-actions"><span class="status">界面预览 · 模型未连接</span><button class="icon-btn" id="themeBtn" aria-label="切换主题" title="切换主题">◐</button></div>
+ </header>
+ <section class="chat-scroll" id="chatScroll">
+  <div class="conversation">
+   <div class="welcome" id="welcome">
+    <div class="welcome-kicker">WELCOME TO YOUR WORKSPACE</div>
+    <h1>今天想从哪里<br>开始？</h1>
+    <p>这里会成为我们的独立聊天空间。先把界面和交互整理好，再安全接入模型服务。</p>
+    <div class="welcome-rule"></div>
+    <div class="suggestions">
+     <button class="suggestion" data-prompt="帮我整理一下今天想做的事情。"><strong>整理灵感与计划</strong><small>把零散想法变成清晰步骤</small></button>
+     <button class="suggestion" data-prompt="陪我 brainstorm 一个新项目。"><strong>一起构思新项目</strong><small>从一个念头开始慢慢展开</small></button>
+     <button class="suggestion" data-prompt="帮我解释一个我不太懂的技术概念。"><strong>解释一个新概念</strong><small>用容易理解的方式讲清楚</small></button>
+     <button class="suggestion" data-prompt="帮我润色一段文字，保留原本的语气。"><strong>写作与润色</strong><small>保留语气，让表达更自然</small></button>
+    </div>
+   </div>
+   <div class="messages" id="messages" aria-live="polite"></div>
+  </div>
+ </section>
+ <footer class="composer-wrap">
+  <form class="composer" id="composer">
+   <textarea id="prompt" rows="2" maxlength="12000" placeholder="给 Chat Studio 发送一条消息……" aria-label="输入消息"></textarea>
+   <div class="composer-bottom"><div class="composer-tools"><button class="tool-btn" type="button" disabled title="第二阶段接入">＋ 附件（后续开放）</button><button class="tool-btn" type="button" disabled>模型选择（后续开放）</button></div><button class="send-btn" id="sendBtn" type="submit" aria-label="发送消息" disabled>↑</button></div>
+  </form>
+  <div class="footnote">当前为本机界面预览。消息只保存在此浏览器，不会发送给模型。</div>
+ </footer>
+</main>
+</div>
+<script>
+'use strict';
+const STORE='atelier.chat.preview.v1';
+const THEME='atelier.chat.theme.v1';
+const $=(id)=>document.getElementById(id);
+let chats=[];
+let activeId=null;
+function makeId(){return 'c'+Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
+function readChats(){try{const v=JSON.parse(localStorage.getItem(STORE)||'[]');return Array.isArray(v)?v.filter(x=>x&&typeof x.id==='string'&&Array.isArray(x.messages)).slice(0,40):[]}catch{return []}}
+function saveChats(){try{localStorage.setItem(STORE,JSON.stringify(chats.slice(0,40)))}catch{}}
+function current(){return chats.find(c=>c.id===activeId)}
+function escapeText(s){return String(s??'')}
+function setTheme(theme){document.documentElement.dataset.theme=theme;$('themeLabel').textContent=theme==='light'?'浅色':'深色';try{localStorage.setItem(THEME,theme)}catch{}}
+function toggleTheme(){setTheme(document.documentElement.dataset.theme==='light'?'dark':'light')}
+function createChat(){const c={id:makeId(),title:'新对话',updated:Date.now(),messages:[]};chats.unshift(c);activeId=c.id;saveChats();render();$('prompt').focus();closeSidebar()}
+function renderHistory(){const host=$('history');host.replaceChildren();if(!chats.length){const p=document.createElement('div');p.style.cssText='padding:12px 9px;color:var(--muted);font-size:10px;line-height:1.8';p.textContent='还没有本机对话记录。';host.append(p);return}for(const c of chats){const b=document.createElement('button');b.className='history-item'+(c.id===activeId?' active':'');const dot=document.createElement('i');const t=document.createElement('span');t.textContent=c.title||'新对话';b.append(dot,t);b.addEventListener('click',()=>{activeId=c.id;render();closeSidebar()});host.append(b)}}
+function renderMessages(){const host=$('messages');host.replaceChildren();const c=current();$('welcome').hidden=!!(c&&c.messages.length);if(!c)return;for(const m of c.messages){const row=document.createElement('article');row.className='message '+(m.role==='user'?'user':'assistant');const avatar=document.createElement('div');avatar.className='avatar';avatar.textContent=m.role==='user'?'F':'A';const body=document.createElement('div');body.className='message-body';const meta=document.createElement('div');meta.className='message-meta';const who=document.createElement('strong');who.textContent=m.role==='user'?'YOU':'ATELIER';const time=document.createElement('small');time.textContent=new Date(m.time).toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'});meta.append(who,time);const content=document.createElement('div');content.className='message-text';content.textContent=m.content;body.append(meta,content);if(m.role==='assistant'){const note=document.createElement('div');note.className='preview-note';note.textContent='本机预览回执：消息已在当前浏览器中保存。模型接口尚未连接，因此这不是 AI 生成的回答。';body.append(note)}row.append(avatar,body);host.append(row)}}
+function render(){renderHistory();renderMessages();$('chatScroll').scrollTop=$('chatScroll').scrollHeight}
+function sendMessage(text){const content=String(text||'').trim();if(!content)return;let c=current();if(!c){c={id:makeId(),title:content.slice(0,24),updated:Date.now(),messages:[]};chats.unshift(c);activeId=c.id}if(!c.messages.length)c.title=content.replace(/\s+/g,' ').slice(0,24);c.messages.push({role:'user',content,time:Date.now()});c.updated=Date.now();saveChats();$('prompt').value='';$('sendBtn').disabled=true;render()}
+function closeSidebar(){$('sidebar').classList.remove('open');$('backdrop').classList.remove('show')}
+$('newChat').addEventListener('click',createChat);
+$('composer').addEventListener('submit',e=>{e.preventDefault();sendMessage($('prompt').value)});
+$('prompt').addEventListener('input',()=>{$('sendBtn').disabled=!$('prompt').value.trim()});
+$('prompt').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();$('composer').requestSubmit()}});
+document.querySelectorAll('[data-prompt]').forEach(b=>b.addEventListener('click',()=>{$('prompt').value=b.dataset.prompt;$('sendBtn').disabled=false;$('prompt').focus()}));
+$('menuBtn').addEventListener('click',()=>{$('sidebar').classList.add('open');$('backdrop').classList.add('show')});
+$('backdrop').addEventListener('click',closeSidebar);
+$('themeBtn').addEventListener('click',toggleTheme);$('themeSide').addEventListener('click',toggleTheme);
+$('clearHistory').addEventListener('click',()=>{if(!confirm('只清除这台设备上的 Chat Studio 预览记录，确定吗？'))return;chats=[];activeId=null;saveChats();render();closeSidebar()});
+$('backHome').addEventListener('click',()=>location.href='../control-center-01/');
+chats=readChats();if(chats.length)activeId=chats[0].id;let theme='dark';try{theme=localStorage.getItem(THEME)||'dark'}catch{}setTheme(theme);render();
+</script>
+</body>
+</html>
