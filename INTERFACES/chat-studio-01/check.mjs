@@ -27,12 +27,13 @@ function inspectHtml(path, required = []) {
 
 const chat = inspectHtml(chatPath, [
   'id="sidebar"', 'id="history"', 'id="messages"', 'id="composer"',
-  'id="prompt"', 'id="themeBtn"', 'data-theme="light"',
+  'id="prompt"', 'id="themeBtn"', 'data-theme="light"', 'aria-expanded="false"',
   "localStorage", "e.shiftKey", "safe-area-inset-bottom"
 ]);
 
 assert.ok(chat.includes("模型未连接"), "Preview must clearly show that no model is connected");
 assert.ok(chat.includes("不会发送给模型"), "Preview must explain that messages stay local");
+assert.ok(chat.includes("closeSidebar(true)"), "Mobile sidebar must support Escape and return focus to its trigger");
 assert.ok(!/fetch\s*\(/i.test(chat), "Phase 1 frontend must not call remote APIs");
 assert.ok(
   !/HCNSEC_API_KEY|ATELIER_SESSION_SECRET|sk-[A-Za-z0-9]{16,}/.test(chat),
