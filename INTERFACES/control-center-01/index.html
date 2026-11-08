@@ -83,6 +83,31 @@ html{background:var(--bg)}body{background:radial-gradient(ellipse at 78% 0%,#302
 .music-library-note{font:9px/1.7 system-ui,sans-serif;color:#92869b;margin-top:10px}
 @media(max-width:420px){.music-result-row{gap:5px}.music-favorite-toggle{padding:8px 7px;font-size:8px}}
 
+
+/* Music Lab · browser-local playlists */
+.playlist-create-form{display:flex;gap:8px;margin:14px 0}
+.playlist-create-form input,.playlist-rename-form input,.playlist-add-select{min-width:0;border:1px solid #51445f;background:#17131e;color:#eee6f4;padding:10px 11px;font:11px system-ui,sans-serif;border-radius:0}
+.playlist-create-form input{flex:1}
+.playlist-create-form .action{white-space:nowrap}
+.playlist-list{display:flex;flex-wrap:wrap;gap:7px;padding:4px 0 12px}
+.playlist-chip{border:1px solid #51445f;background:transparent;color:#c9bbd5;padding:8px 11px;font:10px system-ui,sans-serif;cursor:pointer;max-width:100%}
+.playlist-chip[aria-pressed="true"]{background:#30253b;border-color:#a38bb8;color:#fff}
+.playlist-detail{border-top:1px solid #393047;padding-top:12px}
+.playlist-detail-head{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.playlist-detail-head strong{font:17px Georgia,serif;color:#eee6f4}
+.playlist-detail-actions{display:flex;gap:6px}
+.playlist-detail-actions button,.playlist-track-remove{border:1px solid #665477;background:transparent;color:#d8c4eb;padding:7px 9px;font:9px system-ui,sans-serif;cursor:pointer}
+.playlist-rename-form{display:flex;gap:7px;margin:10px 0}
+.playlist-rename-form input{flex:1}
+.playlist-rename-form button,.playlist-add-button{border:1px solid #665477;background:#30253b;color:#eee6f4;padding:8px 10px;font:9px system-ui,sans-serif;cursor:pointer}
+.playlist-track-row{display:flex;align-items:center;gap:7px;border-bottom:1px solid #393047}
+.playlist-track-row .music-result{flex:1;min-width:0;border:0}
+.playlist-add-controls{display:flex;gap:5px;align-items:center;margin-left:6px}
+.playlist-add-select{max-width:115px;padding:7px 5px;font-size:9px}
+.playlist-add-button{padding:7px}
+.playlist-track-remove{flex:0 0 auto}
+@media(max-width:420px){.playlist-create-form{gap:5px}.playlist-create-form input{padding:9px 7px}.playlist-add-select{max-width:88px}.playlist-add-button{padding:7px 6px}}
+
 </style>
 </head>
 <body>
@@ -129,6 +154,14 @@ html{background:var(--bg)}body{background:radial-gradient(ellipse at 78% 0%,#302
   <div class="music-panel-head"><div><h3>我的收藏</h3><p>MY MUSIC LIBRARY</p></div><span class="tag" id="favoriteCount">0 首</span></div>
   <div id="favoriteResults" class="music-results"><div class="music-library-empty"><strong>留住喜欢的旋律</strong>在搜索结果里点「收藏」，歌曲就会放进这里。</div></div>
   <p class="music-library-note">收藏只保存在当前浏览器，不会上传账号或同步到其他设备。</p>
+ </div>
+
+ <div class="panel music-playlists-panel">
+  <div class="music-panel-head"><div><h3>我的歌单</h3><p>PERSONAL PLAYLISTS</p></div><span class="tag" id="playlistCount">0 个</span></div>
+  <form class="playlist-create-form" id="playlistCreateForm"><input id="playlistNameInput" type="text" maxlength="32" placeholder="给新歌单取个名字" aria-label="新歌单名称"><button class="action" type="submit">创建歌单</button></form>
+  <div class="playlist-list" id="playlistList"><div class="music-library-empty"><strong>从一张歌单开始</strong>创建歌单，再把收藏的歌曲放进去。</div></div>
+  <div class="playlist-detail" id="playlistDetail"><div class="music-library-empty">选择或创建一个歌单，就可以开始整理歌曲。</div></div>
+  <p class="music-library-note">歌单和歌曲仅保存在当前浏览器，与网易云账号收藏相互独立。</p>
  </div>
  <div class="panel player-panel">
   <div class="music-panel-head"><div><h3>正在播放</h3><p>PLAYER</p></div><span class="tag">待连接</span></div>
@@ -343,6 +376,123 @@ function persistFavoriteSongs() {
 function isFavorite(song) {
   return favoriteSongs.some((item) => item.id === String(song.id));
 }
+
+const PLAYLISTS_STORAGE_KEY = 'atelier.music.playlists.v1';
+function normalizePlaylist(value) {
+  if (!value || typeof value !== 'object' || !/^[a-zA-Z0-9_-]{1,64}$/.test(String(value.id || ''))) return null;
+  const songs = Array.isArray(value.songs) ? value.songs.map(normalizeFavoriteSong).filter(Boolean).slice(0, 200) : [];
+  return { id:String(value.id), name:String(value.name || '未命名歌单').trim().slice(0, 32) || '未命名歌单', songs };
+}
+function readPlaylists() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(PLAYLISTS_STORAGE_KEY) || '[]');
+    return Array.isArray(saved) ? saved.map(normalizePlaylist).filter(Boolean).slice(0, 30) : [];
+  } catch { return []; }
+}
+let playlists = readPlaylists();
+let activePlaylistId = playlists[0]?.id || null;
+function persistPlaylists() {
+  try { localStorage.setItem(PLAYLISTS_STORAGE_KEY, JSON.stringify(playlists)); return true; }
+  catch { setMusicStatus('浏览器没有允许保存歌单，请检查存储空间或隐私设置。', true); return false; }
+}
+function renderPlaylistManager() {
+  const list = document.getElementById('playlistList');
+  const detail = document.getElementById('playlistDetail');
+  const count = document.getElementById('playlistCount');
+  if (!list || !detail || !count) return;
+  count.textContent = playlists.length + ' 个';
+  list.replaceChildren();
+  if (!playlists.length) {
+    const empty = document.createElement('div');
+    empty.className = 'music-library-empty';
+    const strong = document.createElement('strong');
+    strong.textContent = '从一张歌单开始';
+    empty.append(strong, document.createTextNode('创建歌单，再把收藏的歌曲放进去。'));
+    list.append(empty);
+    detail.textContent = '选择或创建一个歌单，就可以开始整理歌曲。';
+    detail.className = 'playlist-detail music-library-empty';
+    return;
+  }
+  if (!playlists.some((item) => item.id === activePlaylistId)) activePlaylistId = playlists[0].id;
+  playlists.forEach((playlist) => {
+    const chip = document.createElement('button');
+    chip.type = 'button';
+    chip.className = 'playlist-chip';
+    chip.textContent = playlist.name + ' · ' + playlist.songs.length;
+    chip.setAttribute('aria-pressed', String(playlist.id === activePlaylistId));
+    chip.addEventListener('click', () => { activePlaylistId = playlist.id; renderPlaylistManager(); });
+    list.append(chip);
+  });
+  const active = playlists.find((item) => item.id === activePlaylistId);
+  detail.replaceChildren();
+  detail.className = 'playlist-detail';
+  const head = document.createElement('div');
+  head.className = 'playlist-detail-head';
+  const title = document.createElement('strong');
+  title.textContent = active.name;
+  const actions = document.createElement('div');
+  actions.className = 'playlist-detail-actions';
+  const removePlaylist = document.createElement('button');
+  removePlaylist.type = 'button';
+  removePlaylist.textContent = '删除歌单';
+  removePlaylist.addEventListener('click', () => {
+    if (!confirm('删除歌单「' + active.name + '」？其中歌曲不会从「我的收藏」中删除。')) return;
+    playlists = playlists.filter((item) => item.id !== active.id);
+    activePlaylistId = playlists[0]?.id || null;
+    persistPlaylists(); renderPlaylistManager(); renderFavorites();
+  });
+  actions.append(removePlaylist);
+  head.append(title, actions);
+  detail.append(head);
+  const rename = document.createElement('form');
+  rename.className = 'playlist-rename-form';
+  const nameInput = document.createElement('input');
+  nameInput.type = 'text'; nameInput.maxLength = 32; nameInput.value = active.name;
+  nameInput.setAttribute('aria-label', '修改歌单名称');
+  const saveName = document.createElement('button');
+  saveName.type = 'submit'; saveName.textContent = '重命名';
+  rename.append(nameInput, saveName);
+  rename.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const name = nameInput.value.trim();
+    if (!name) { setMusicStatus('歌单名称不能为空。', true); return; }
+    active.name = name.slice(0, 32);
+    persistPlaylists(); renderPlaylistManager(); renderFavorites();
+  });
+  detail.append(rename);
+  if (!active.songs.length) {
+    const empty = document.createElement('div');
+    empty.className = 'music-library-empty';
+    empty.textContent = '这张歌单还没有歌曲。可以从「我的收藏」里添加。';
+    detail.append(empty);
+    return;
+  }
+  active.songs.forEach((song) => {
+    const row = document.createElement('div');
+    row.className = 'playlist-track-row';
+    row.append(makeSongSelectButton(song));
+    const remove = document.createElement('button');
+    remove.type = 'button'; remove.className = 'playlist-track-remove'; remove.textContent = '移出';
+    remove.setAttribute('aria-label', '从歌单移除 ' + song.name);
+    remove.addEventListener('click', () => {
+      active.songs = active.songs.filter((item) => item.id !== song.id);
+      persistPlaylists(); renderPlaylistManager(); renderFavorites();
+    });
+    row.append(remove); detail.append(row);
+  });
+}
+function addFavoriteToPlaylist(song, playlistId) {
+  const target = playlists.find((item) => item.id === playlistId);
+  if (!target) { setMusicStatus('请先创建或选择一张歌单。', true); return; }
+  if (target.songs.some((item) => item.id === String(song.id))) {
+    setMusicStatus('这首歌已经在「' + target.name + '」里了。'); return;
+  }
+  if (target.songs.length >= 200) { setMusicStatus('单张歌单最多保存 200 首歌曲。', true); return; }
+  target.songs.push(normalizeFavoriteSong(song));
+  persistPlaylists(); renderPlaylistManager();
+  setMusicStatus('已加入歌单「' + target.name + '」。');
+}
+
 function makeSongSelectButton(song) {
   const button = document.createElement('button');
   button.type = 'button';
@@ -405,6 +555,21 @@ function renderFavorites() {
       renderSongResults(window.__atelierLastMusicResults || []);
     });
     row.append(remove);
+    if (playlists.length) {
+      const controls = document.createElement('div');
+      controls.className = 'playlist-add-controls';
+      const select = document.createElement('select');
+      select.className = 'playlist-add-select';
+      select.setAttribute('aria-label', '选择要加入的歌单');
+      playlists.forEach((playlist) => {
+        const option = document.createElement('option');
+        option.value = playlist.id; option.textContent = playlist.name; select.append(option);
+      });
+      const add = document.createElement('button');
+      add.type = 'button'; add.className = 'playlist-add-button'; add.textContent = '加入';
+      add.addEventListener('click', () => addFavoriteToPlaylist(song, select.value));
+      controls.append(select, add); row.append(controls);
+    }
     results.append(row);
   });
 }
@@ -460,6 +625,24 @@ function renderSongResults(items) {
   });
 }
 renderFavorites();
+renderPlaylistManager();
+document.getElementById('playlistCreateForm').addEventListener('submit', (event) => {
+  event.preventDefault();
+  const input = document.getElementById('playlistNameInput');
+  const name = input.value.trim();
+  if (!name) { setMusicStatus('先给新歌单取个名字。', true); return; }
+  if (playlists.length >= 30) { setMusicStatus('本地歌单最多创建 30 个。', true); return; }
+  if (playlists.some((item) => item.name.toLowerCase() === name.toLowerCase())) {
+    setMusicStatus('已经有同名歌单啦，换一个名字吧。', true); return;
+  }
+  const id = 'pl_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 8);
+  playlists.unshift({ id, name:name.slice(0, 32), songs:[] });
+  activePlaylistId = id;
+  if (persistPlaylists()) {
+    input.value = ''; renderPlaylistManager(); renderFavorites();
+    setMusicStatus('歌单「' + name + '」创建好了。');
+  }
+});
 document.getElementById('musicSearch').addEventListener('submit', async (event) => {
   event.preventDefault();
   const query = document.getElementById('songQuery').value.trim();
