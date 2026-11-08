@@ -11,7 +11,7 @@ Open `index.html` in a modern browser, or serve the repository with any static f
 ## Phase 1 scope
 
 - Responsive chat workspace with a mobile drawer sidebar.
-- New conversations, local conversation history, and per-chat rename/delete actions.
+- New conversations, local conversation history, full-text search, favorites filtering, and per-chat rename/delete actions.
 - Export the current conversation as a plain-text file and import Chat Studio TXT exports as separate conversations (up to 1 MB / 200 messages).
 - Message rendering using text nodes (no HTML injection).
 - Composer with Enter-to-send and Shift+Enter for a new line.
@@ -39,4 +39,6 @@ The model selector, attachments, voice, streaming, cloud history, and authentica
 4. Send a multi-line message; verify Enter sends and Shift+Enter inserts a line break.
 5. Refresh the page and confirm local history remains.
 6. Switch dark/light theme, refresh, and confirm the preference remains.
-7. Use the return link to go back to Control Center.
+7. Search for a word from a message and confirm matching chats appear.
+8. Favorite a conversation, enable the favorites filter, and confirm only favorites remain.
+9. Use the return link to go back to Control Center.
