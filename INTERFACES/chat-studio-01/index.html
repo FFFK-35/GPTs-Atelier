@@ -32,7 +32,7 @@
 <main class="main">
  <header class="topbar">
   <div class="top-left">
-   <button class="menu-btn" id="menuBtn" aria-label="打开侧边栏">☰</button>
+   <button class="menu-btn" id="menuBtn" aria-label="打开侧边栏" aria-controls="sidebar" aria-expanded="false">☰</button>
    <div><div class="page-title">Chat Studio</div><div class="page-sub">A PRIVATE SPACE FOR THOUGHTS</div></div>
   </div>
   <div class="top-actions"><span class="status">界面预览 · 模型未连接</span><button class="icon-btn" id="themeBtn" aria-label="切换主题" title="切换主题">◐</button></div>
@@ -82,13 +82,14 @@ function renderMessages(){const host=$('messages');host.replaceChildren();const 
 function render(){renderHistory();renderMessages();$('chatScroll').scrollTop=$('chatScroll').scrollHeight}
 function resizePrompt(){$('prompt').style.height='auto';$('prompt').style.height=Math.min($('prompt').scrollHeight,170)+'px'}
 function sendMessage(text){const content=String(text||'').trim();if(!content)return;let c=current();if(!c){c={id:makeId(),title:content.slice(0,24),updated:Date.now(),messages:[]};chats.unshift(c);activeId=c.id}if(!c.messages.length)c.title=content.replace(/\s+/g,' ').slice(0,24);c.messages.push({role:'user',content,time:Date.now()});c.updated=Date.now();saveChats();$('prompt').value='';$('sendBtn').disabled=true;render()}
-function closeSidebar(){$('sidebar').classList.remove('open');$('backdrop').classList.remove('show')}
+function closeSidebar(returnFocus=false){$('sidebar').classList.remove('open');$('backdrop').classList.remove('show');$('menuBtn').setAttribute('aria-expanded','false');if(returnFocus)$('menuBtn').focus()}
 $('newChat').addEventListener('click',createChat);
 $('composer').addEventListener('submit',e=>{e.preventDefault();sendMessage($('prompt').value)});
 $('prompt').addEventListener('input',()=>{$('sendBtn').disabled=!$('prompt').value.trim();resizePrompt()});
 $('prompt').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();$('composer').requestSubmit()}});
 document.querySelectorAll('[data-prompt]').forEach(b=>b.addEventListener('click',()=>{$('prompt').value=b.dataset.prompt;$('sendBtn').disabled=false;$('prompt').focus()}));
-$('menuBtn').addEventListener('click',()=>{$('sidebar').classList.add('open');$('backdrop').classList.add('show')});
+$('menuBtn').addEventListener('click',()=>{$('sidebar').classList.add('open');$('backdrop').classList.add('show');$('menuBtn').setAttribute('aria-expanded','true')});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('sidebar').classList.contains('open'))closeSidebar(true)});
 $('backdrop').addEventListener('click',closeSidebar);
 $('themeBtn').addEventListener('click',toggleTheme);$('themeSide').addEventListener('click',toggleTheme);
 $('clearHistory').addEventListener('click',()=>{if(!confirm('只清除这台设备上的 Chat Studio 预览记录，确定吗？'))return;chats=[];activeId=null;saveChats();render();closeSidebar()});
