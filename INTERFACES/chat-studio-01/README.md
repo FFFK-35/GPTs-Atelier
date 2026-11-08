@@ -11,7 +11,8 @@ Open `index.html` in a modern browser, or serve the repository with any static f
 ## Phase 1 scope
 
 - Responsive chat workspace with a mobile drawer sidebar.
-- New conversations, local conversation history, and per-chat rename/delete actions.\n- Export the current conversation as a plain-text file.
+- New conversations, local conversation history, and per-chat rename/delete actions.
+- Export the current conversation as a plain-text file.
 - Message rendering using text nodes (no HTML injection).
 - Composer with Enter-to-send and Shift+Enter for a new line.
 - Dark/light theme preference.
