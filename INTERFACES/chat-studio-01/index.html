@@ -74,18 +74,18 @@ function makeId(){return 'c'+Date.now().toString(36)+Math.random().toString(36).
 function readChats(){try{const v=JSON.parse(localStorage.getItem(STORE)||'[]');return Array.isArray(v)?v.filter(x=>x&&typeof x.id==='string'&&Array.isArray(x.messages)).slice(0,40):[]}catch{return []}}
 function saveChats(){try{localStorage.setItem(STORE,JSON.stringify(chats.slice(0,40)))}catch{}}
 function current(){return chats.find(c=>c.id===activeId)}
-function escapeText(s){return String(s??'')}
 function setTheme(theme){document.documentElement.dataset.theme=theme;$('themeLabel').textContent=theme==='light'?'浅色':'深色';try{localStorage.setItem(THEME,theme)}catch{}}
 function toggleTheme(){setTheme(document.documentElement.dataset.theme==='light'?'dark':'light')}
 function createChat(){const c={id:makeId(),title:'新对话',updated:Date.now(),messages:[]};chats.unshift(c);activeId=c.id;saveChats();render();$('prompt').focus();closeSidebar()}
 function renderHistory(){const host=$('history');host.replaceChildren();if(!chats.length){const p=document.createElement('div');p.style.cssText='padding:12px 9px;color:var(--muted);font-size:10px;line-height:1.8';p.textContent='还没有本机对话记录。';host.append(p);return}for(const c of chats){const b=document.createElement('button');b.className='history-item'+(c.id===activeId?' active':'');const dot=document.createElement('i');const t=document.createElement('span');t.textContent=c.title||'新对话';b.append(dot,t);b.addEventListener('click',()=>{activeId=c.id;render();closeSidebar()});host.append(b)}}
 function renderMessages(){const host=$('messages');host.replaceChildren();const c=current();$('welcome').hidden=!!(c&&c.messages.length);if(!c)return;for(const m of c.messages){const row=document.createElement('article');row.className='message '+(m.role==='user'?'user':'assistant');const avatar=document.createElement('div');avatar.className='avatar';avatar.textContent=m.role==='user'?'F':'A';const body=document.createElement('div');body.className='message-body';const meta=document.createElement('div');meta.className='message-meta';const who=document.createElement('strong');who.textContent=m.role==='user'?'YOU':'ATELIER';const time=document.createElement('small');time.textContent=new Date(m.time).toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'});meta.append(who,time);const content=document.createElement('div');content.className='message-text';content.textContent=m.content;body.append(meta,content);if(m.role==='assistant'){const note=document.createElement('div');note.className='preview-note';note.textContent='本机预览回执：消息已在当前浏览器中保存。模型接口尚未连接，因此这不是 AI 生成的回答。';body.append(note)}row.append(avatar,body);host.append(row)}}
 function render(){renderHistory();renderMessages();$('chatScroll').scrollTop=$('chatScroll').scrollHeight}
+function resizePrompt(){$('prompt').style.height='auto';$('prompt').style.height=Math.min($('prompt').scrollHeight,170)+'px'}
 function sendMessage(text){const content=String(text||'').trim();if(!content)return;let c=current();if(!c){c={id:makeId(),title:content.slice(0,24),updated:Date.now(),messages:[]};chats.unshift(c);activeId=c.id}if(!c.messages.length)c.title=content.replace(/\s+/g,' ').slice(0,24);c.messages.push({role:'user',content,time:Date.now()});c.updated=Date.now();saveChats();$('prompt').value='';$('sendBtn').disabled=true;render()}
 function closeSidebar(){$('sidebar').classList.remove('open');$('backdrop').classList.remove('show')}
 $('newChat').addEventListener('click',createChat);
 $('composer').addEventListener('submit',e=>{e.preventDefault();sendMessage($('prompt').value)});
-$('prompt').addEventListener('input',()=>{$('sendBtn').disabled=!$('prompt').value.trim()});
+$('prompt').addEventListener('input',()=>{$('sendBtn').disabled=!$('prompt').value.trim();resizePrompt()});
 $('prompt').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();$('composer').requestSubmit()}});
 document.querySelectorAll('[data-prompt]').forEach(b=>b.addEventListener('click',()=>{$('prompt').value=b.dataset.prompt;$('sendBtn').disabled=false;$('prompt').focus()}));
 $('menuBtn').addEventListener('click',()=>{$('sidebar').classList.add('open');$('backdrop').classList.add('show')});
@@ -93,7 +93,7 @@ $('backdrop').addEventListener('click',closeSidebar);
 $('themeBtn').addEventListener('click',toggleTheme);$('themeSide').addEventListener('click',toggleTheme);
 $('clearHistory').addEventListener('click',()=>{if(!confirm('只清除这台设备上的 Chat Studio 预览记录，确定吗？'))return;chats=[];activeId=null;saveChats();render();closeSidebar()});
 $('backHome').addEventListener('click',()=>location.href='../control-center-01/');
-chats=readChats();if(chats.length)activeId=chats[0].id;let theme='dark';try{theme=localStorage.getItem(THEME)||'dark'}catch{}setTheme(theme);render();
+chats=readChats().sort((a,b)=>(b.updated||0)-(a.updated||0));if(chats.length)activeId=chats[0].id;let theme='dark';try{theme=localStorage.getItem(THEME)||'dark'}catch{}setTheme(theme);render();
 </script>
 </body>
 </html>
