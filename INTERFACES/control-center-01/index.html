@@ -134,6 +134,7 @@ html{background:var(--bg)}body{background:radial-gradient(ellipse at 78% 0%,#302
 </section>
 <nav class="nav" aria-label="工作台导航">
  <button data-view="overview" aria-current="true"><strong>总览 Overview</strong><small>工作室首页</small></button>
+ <button data-view="chat" aria-current="false"><strong>聊天 Chat Studio</strong><small>独立聊天空间</small></button>
  <button data-view="music" aria-current="false"><strong>音乐 Music Lab</strong><small>音乐服务入口</small></button>
  <button data-view="tools" aria-current="false"><strong>工具 Toolbox</strong><small>扩展能力</small></button>
 </nav>
@@ -146,6 +147,16 @@ html{background:var(--bg)}body{background:radial-gradient(ellipse at 78% 0%,#302
   <article class="tile"><div class="kicker">04 / TOOLS</div><h3>Toolbox</h3><p>为后续工具模块预留入口。</p></article>
  </div>
  <div class="panel"><h3>接下来</h3><p>先完成网页部署与手机验收，然后再连接音乐服务。界面本身不需要依赖外部字体、图片或 CDN。</p><div class="notice">当前是前端基础版本。尚未连接音乐账号、云端 API 或 MCP 服务；不会假装这些功能已经可用。</div></div>
+</section>
+<section class="view" id="chat">
+ <div class="section-head"><h2>Chat Studio</h2><span>独立聊天工作区</span></div>
+ <div class="panel">
+  <div class="music-panel-head"><div><h3>一个属于我们的聊天空间</h3><p>手机优先的独立聊天界面，先完成体验，再安全接入模型。</p></div><span class="tag">PHASE 01</span></div>
+  <div class="notice">当前开放的是界面预览。消息暂存在当前浏览器，不会发送给模型；模型连接、附件与语音会在后续阶段接入。</div>
+  <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:17px">
+   <a class="action" href="../chat-studio-01/" style="display:inline-block;text-decoration:none">打开 Chat Studio ↗</a>
+  </div>
+ </div>
 </section>
 <section class="view" id="music">
  <div class="section-head"><h2>Music Lab</h2><span>音乐实验室</span></div>
