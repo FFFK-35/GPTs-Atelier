@@ -43,6 +43,11 @@ assert.ok(chat.includes('id="importFile"'), "Chat Studio must provide a local TX
 assert.ok(chat.includes("parseExportedText"), "TXT import must parse exported conversation files");
 assert.ok(chat.includes("MAX_IMPORT_BYTES"), "TXT import must enforce a file-size limit");
 assert.ok(chat.includes("file.text()"), "TXT import must read the selected file locally");
+assert.ok(chat.includes('id="historySearch"'), "Chat history must provide a search field");
+assert.ok(chat.includes('id="favoritesOnly"'), "Chat history must provide a favorites filter");
+assert.ok(chat.includes("c.favorite=!c.favorite"), "Conversations must be individually favoritable");
+assert.ok(chat.includes("toLocaleLowerCase"), "Chat search must be case-insensitive");
+
 
 assert.ok(chat.includes("chats.filter(item=>item.id!==c.id)"), "Conversation deletion must remove only the active local chat");
 assert.ok(!/fetch\s*\(/i.test(chat), "Phase 1 frontend must not call remote APIs");
