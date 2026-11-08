@@ -43,6 +43,14 @@ button,input{font:inherit}button{color:inherit}.shell{width:min(100%,900px);marg
 .lyrics-text{white-space:pre-wrap;text-align:center;line-height:2;font-size:12px;color:#c8ccda;max-height:420px;overflow:auto;padding:8px 4px}
 
 .player-shell-card{display:flex;align-items:center;gap:13px;margin-top:15px;padding:13px;border:1px solid #34364d;border-radius:16px;background:linear-gradient(135deg,#24243a,#171d2b 68%,#202238);box-shadow:inset 0 1px #ffffff0a,0 12px 28px #0002}.player-shell-cover{width:64px;height:64px;flex:0 0 64px;border-radius:12px;object-fit:cover;background:linear-gradient(145deg,#373452,#171d2b);box-shadow:0 5px 16px #0005}.player-shell-copy{min-width:0;flex:1}.player-shell-copy strong,.player-shell-copy small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.player-shell-copy strong{font-size:13px}.player-shell-copy small{margin-top:4px;color:var(--muted);font-size:10px}.player-shell-action{flex:0 0 auto;width:42px;height:42px;border:1px solid #625b85;border-radius:50%;background:linear-gradient(145deg,#494268,#292640);color:#e5ddff;font-size:15px;box-shadow:0 4px 14px #0003;cursor:pointer}.player-shell-action:active{transform:scale(.96)}.player-shell-status{font-size:9px;letter-spacing:.08em;color:#b8addf;margin-top:6px}.official-player{display:none;width:100%;min-width:0;margin-top:11px;padding:10px;border:1px solid #34364d;border-radius:13px;background:#171b29}.official-player.open{display:block}.official-player iframe{display:block;width:100%;max-width:100%;height:86px;border:0;border-radius:8px;background:#fff}.player-fallback{display:inline-block;margin-top:8px;color:#aeb6ca;font-size:11px;text-decoration:underline}.player-control-note{font-size:10px;color:var(--muted);margin:8px 2px 0;line-height:1.6}
+
+.play-queue{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:12px;padding:11px 0;border-top:1px solid #393047;border-bottom:1px solid #393047}
+.play-queue-meta{min-width:0;font:10px/1.6 system-ui,sans-serif;color:#a99fb1}
+.play-queue-meta strong{display:block;color:#e8dfee;font:13px Georgia,serif}
+.play-queue-actions{display:flex;gap:7px;flex:0 0 auto}
+.play-queue-actions button{min-width:36px;padding:7px 10px;border:1px solid #695778;background:transparent;color:#e6d8f0;border-radius:2px;cursor:pointer}
+.play-queue-actions button:disabled{opacity:.35;cursor:not-allowed}
+
 /* EDITORIAL REDESIGN · violet private journal */
 :root{color-scheme:dark;--bg:#100d18;--panel:#171321;--panel2:#201a2c;--line:#393047;--text:#f0ebf6;--muted:#a49aac;--blue:#c5b4dc;--violet:#c8b1e6;--good:#b7a4ca}
 html{background:var(--bg)}body{background:radial-gradient(ellipse at 78% 0%,#30233f 0,transparent 34%),linear-gradient(180deg,#120e1a,#100d18 56%,#0e0c15);color:var(--text);font-family:Georgia,"Noto Serif SC","Songti SC",serif;letter-spacing:.005em}
@@ -166,6 +174,10 @@ html{background:var(--bg)}body{background:radial-gradient(ellipse at 78% 0%,#302
  <div class="panel player-panel">
   <div class="music-panel-head"><div><h3>正在播放</h3><p>PLAYER</p></div><span class="tag">待连接</span></div>
   <div class="player-shell-card"><img class="player-shell-cover" id="playerCover" alt="" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 80'%3E%3Crect width='80' height='80' rx='12' fill='%232d2b45'/%3E%3Ctext x='40' y='51' text-anchor='middle' font-size='34' fill='%23c5b6ff'%3E%E2%99%AB%3C/text%3E%3C/svg%3E"><div class="player-shell-copy"><strong id="trackTitle">尚未选择歌曲</strong><small id="trackArtist">选择搜索结果后显示歌曲信息</small><div class="player-shell-status" id="playerShellStatus">ATELIER PLAYER · READY</div></div><button class="player-shell-action" id="toggleOfficialPlayer" type="button" aria-label="展开播放控件" aria-expanded="false">▶</button></div>
+  <div class="play-queue" aria-label="播放队列">
+   <div class="play-queue-meta"><strong id="queuePosition">播放队列为空</strong><span id="queueDescription">从搜索结果或歌单中选择歌曲，建立临时队列。</span></div>
+   <div class="play-queue-actions"><button id="queuePrevious" type="button" aria-label="上一首" disabled>上一首</button><button id="queueNext" type="button" aria-label="下一首" disabled>下一首</button></div>
+  </div>
   <div id="officialPlayer" class="official-player"><div class="music-empty">先从搜索结果中选择一首歌，加载网易云外链播放器。</div></div>
   <p class="player-control-note">点右侧播放按钮展开官方播放控件，再点击控件内的播放键。外层卡片负责美化，实际播放仍由网易云官方控件完成。</p>
  </div>
@@ -302,6 +314,9 @@ async function loadLyrics(song) {
   }
 }
 function selectSong(song) {
+  const queuedIndex = playbackQueue.findIndex((item) => item.id === String(song.id));
+  if (queuedIndex >= 0) playbackQueueIndex = queuedIndex;
+  renderPlaybackQueue();
   document.getElementById('trackTitle').textContent = song.name || '未知歌曲';
   document.getElementById('trackArtist').textContent = (song.artists || []).join(' / ') + (song.album ? ' · ' + song.album : '');
   const cover = document.getElementById('playerCover');
@@ -470,7 +485,7 @@ function renderPlaylistManager() {
   active.songs.forEach((song) => {
     const row = document.createElement('div');
     row.className = 'playlist-track-row';
-    row.append(makeSongSelectButton(song));
+    row.append(makeSongSelectButton(song, active.songs));
     const remove = document.createElement('button');
     remove.type = 'button'; remove.className = 'playlist-track-remove'; remove.textContent = '移出';
     remove.setAttribute('aria-label', '从歌单移除 ' + song.name);
@@ -493,7 +508,36 @@ function addFavoriteToPlaylist(song, playlistId) {
   setMusicStatus('已加入歌单「' + target.name + '」。');
 }
 
-function makeSongSelectButton(song) {
+let playbackQueue = [];
+let playbackQueueIndex = -1;
+function renderPlaybackQueue() {
+  const position = document.getElementById('queuePosition');
+  const description = document.getElementById('queueDescription');
+  const previous = document.getElementById('queuePrevious');
+  const next = document.getElementById('queueNext');
+  if (!position || !description || !previous || !next) return;
+  const validIndex = playbackQueueIndex >= 0 && playbackQueueIndex < playbackQueue.length;
+  position.textContent = validIndex ? '第 ' + (playbackQueueIndex + 1) + ' / ' + playbackQueue.length + ' 首' : (playbackQueue.length ? playbackQueue.length + ' 首待播' : '播放队列为空');
+  description.textContent = validIndex ? (playbackQueue[playbackQueueIndex].name || '未知歌曲') + ' · ' + ((playbackQueue[playbackQueueIndex].artists || []).join(' / ') || '未知歌手') : '从搜索结果或歌单中选择歌曲，建立临时队列。';
+  previous.disabled = !validIndex || playbackQueueIndex <= 0;
+  next.disabled = !validIndex || playbackQueueIndex >= playbackQueue.length - 1;
+}
+function setPlaybackQueue(items, selectedId) {
+  playbackQueue = (Array.isArray(items) ? items : []).map(normalizeFavoriteSong).filter(Boolean);
+  playbackQueueIndex = playbackQueue.findIndex((item) => item.id === String(selectedId));
+  renderPlaybackQueue();
+}
+function stepPlaybackQueue(offset) {
+  const nextIndex = playbackQueueIndex + offset;
+  if (nextIndex < 0 || nextIndex >= playbackQueue.length) return;
+  playbackQueueIndex = nextIndex;
+  renderPlaybackQueue();
+  selectSong(playbackQueue[playbackQueueIndex]);
+}
+document.getElementById('queuePrevious').addEventListener('click', () => stepPlaybackQueue(-1));
+document.getElementById('queueNext').addEventListener('click', () => stepPlaybackQueue(1));
+
+function makeSongSelectButton(song, queueItems = [song]) {
   const button = document.createElement('button');
   button.type = 'button';
   button.className = 'music-result';
@@ -521,7 +565,7 @@ function makeSongSelectButton(song) {
   duration.className = 'tag';
   duration.textContent = formatDuration(song.durationMs);
   button.append(duration);
-  button.addEventListener('click', () => selectSong(song));
+  button.addEventListener('click', () => { setPlaybackQueue(queueItems, song.id); selectSong(song); });
   return button;
 }
 function renderFavorites() {
@@ -542,7 +586,7 @@ function renderFavorites() {
   favoriteSongs.forEach((song) => {
     const row = document.createElement('div');
     row.className = 'music-result-row';
-    row.append(makeSongSelectButton(song));
+    row.append(makeSongSelectButton(song, favoriteSongs));
     const remove = document.createElement('button');
     remove.type = 'button';
     remove.className = 'music-favorite-toggle';
@@ -612,7 +656,7 @@ function renderSongResults(items) {
   items.forEach((song) => {
     const row = document.createElement('div');
     row.className = 'music-result-row';
-    row.append(makeSongSelectButton(song));
+    row.append(makeSongSelectButton(song, items));
     const favorite = document.createElement('button');
     favorite.type = 'button';
     favorite.className = 'music-favorite-toggle';
