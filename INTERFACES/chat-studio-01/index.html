@@ -104,16 +104,16 @@ $('exportChat').addEventListener('click',()=>{const c=current();if(!c||!c.messag
 $('deleteChat').addEventListener('click',()=>{const c=current();if(!c)return;if(!window.confirm('确定删除当前这段本机对话吗？此操作无法撤销。'))return;chats=chats.filter(item=>item.id!==c.id);activeId=chats[0]?.id||null;saveChats();render()});
 const MAX_IMPORT_BYTES=1024*1024;
 function parseExportedText(raw){
- const normalized=String(raw||'').replace(/\\r\\n?/g,'\\n').trim();
- const firstBreak=normalized.indexOf('\\n');
+ const normalized=String(raw||'').replace(/\r\n?/g,'\n').trim();
+ const firstBreak=normalized.indexOf('\n');
  if(firstBreak<0)throw new Error('文件格式不正确：没有找到对话标题和消息内容。');
  const title=normalized.slice(0,firstBreak).trim().slice(0,40)||'导入的对话';
  const body=normalized.slice(firstBreak+1).trim();
  if(!body)throw new Error('文件中没有可导入的消息。');
- const chunks=body.split(/\\n\\n(?=\\[[^\\]\\n]+\\] (?:我|助手)\\n)/);
+ const chunks=body.split(/\n\n(?=\[[^\]\n]+\] (?:我|助手)\n)/);
  const messages=[];
  for(const chunk of chunks){
-  const match=chunk.match(/^\\[([^\\]]+)\\] (我|助手)\\n([\\s\\S]*)$/);
+  const match=chunk.match(/^\[([^\]]+)\] (我|助手)\n([\s\S]*)$/);
   if(!match)throw new Error('无法识别消息格式。请导入由 Chat Studio 导出的 TXT 文件。');
   const time=Date.parse(match[1]);
   const content=match[3];
