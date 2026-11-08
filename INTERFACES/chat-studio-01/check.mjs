@@ -21,7 +21,7 @@ function inspectHtml(path, required = []) {
 const chat = inspectHtml(chatPath, [
   'id="sidebar"', 'id="history"', 'id="messages"', 'id="composer"',
   'id="prompt"', 'id="themeBtn"', 'data-theme="light"',
-  'localStorage', 'Shift+Enter', 'safe-area-inset-bottom'
+  'localStorage', 'e.shiftKey', 'safe-area-inset-bottom'
 ]);
 
 assert.ok(chat.includes('模型未连接'), "Preview must clearly show that no model is connected");
