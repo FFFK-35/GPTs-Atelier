@@ -1,5 +1,6 @@
 import { timingSafeEqual } from "node:crypto";
 import { issueSessionToken, SESSION_TTL } from "../_lib/session.js";
+import { enforceRateLimit, getClientIdentity } from "../_lib/rate-limit.js";
 
 const ALLOWED_ORIGIN = "https://fffk-35.github.io";
 
@@ -32,6 +33,13 @@ export default async function handler(req, res) {
 
   if (req.headers?.origin !== ALLOWED_ORIGIN) {
     return fail(res, 403, "ORIGIN_NOT_ALLOWED", "请求来源不受允许");
+  }
+
+  const rate = await enforceRateLimit({ scope: "login", identity: getClientIdentity(req), limit: 5 });
+  if (!rate.configured) return fail(res, 503, "RATE_LIMIT_NOT_CONFIGURED", "登录保护尚未完成配置");
+  if (!rate.ok) {
+    res.setHeader("Retry-After", String(rate.retryAfter));
+    return fail(res, 429, "RATE_LIMITED", "尝试次数过多，请稍后再试");
   }
 
   const password = process.env.ATELIER_ACCESS_PASSWORD;
