@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { enforceRateLimit } from "../api/_lib/rate-limit.js";
+import { enforceRateLimit, getClientIdentity } from "../api/_lib/rate-limit.js";
 
 test("rate limiter fails closed when Redis is not configured", async () => {
   const oldUrl = process.env.UPSTASH_REDIS_REST_URL;
@@ -44,4 +44,19 @@ test("rate limiter uses Redis atomic counter and enforces limit", async () => {
     if (oldToken === undefined) delete process.env.UPSTASH_REDIS_REST_TOKEN;
     else process.env.UPSTASH_REDIS_REST_TOKEN = oldToken;
   }
+});
+
+test("client identity trusts the Cloudflare client IP, not spoofable X-Forwarded-For", () => {
+  assert.equal(getClientIdentity({
+    headers: {
+      "cf-connecting-ip": "203.0.113.7",
+      "x-forwarded-for": "198.51.100.99, 203.0.113.7"
+    }
+  }), "203.0.113.7");
+  assert.equal(getClientIdentity({
+    headers: { "x-forwarded-for": "198.51.100.99" }
+  }), "unknown");
+  assert.equal(getClientIdentity({
+    headers: { "cf-connecting-ip": "not-an-ip" }
+  }), "unknown");
 });
