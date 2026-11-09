@@ -1,4 +1,6 @@
 import { verifySessionToken } from "../_lib/session.js";
+import { createHash } from "node:crypto";
+import { enforceRateLimit } from "../_lib/rate-limit.js";
 
 const PROVIDER_BASE_URL = "https://api.hcnsec.cn/v1";
 const ALLOWED_ORIGIN = "https://fffk-35.github.io";
@@ -39,6 +41,14 @@ export default async function handler(req, res) {
   const token = auth.startsWith("Bearer ") ? auth.slice(7) : "";
   if (!verifySessionToken(token, sessionSecret)) {
     return fail(res, 401, "UNAUTHORIZED", "登录状态已失效，请重新登录");
+  }
+
+  const identity = createHash("sha256").update(token).digest("hex");
+  const rate = await enforceRateLimit({ scope: "chat", identity, limit: 20 });
+  if (!rate.configured) return fail(res, 503, "RATE_LIMIT_NOT_CONFIGURED", "请求保护尚未完成配置");
+  if (!rate.ok) {
+    res.setHeader("Retry-After", String(rate.retryAfter));
+    return fail(res, 429, "RATE_LIMITED", "请求过于频繁，请稍后再试");
   }
 
   const messages = req.body?.messages;
