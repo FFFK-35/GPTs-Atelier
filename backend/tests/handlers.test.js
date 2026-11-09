@@ -34,6 +34,24 @@ function restoreEnv(saved) {
   }
 }
 
+async function withConfiguredRedis(run) {
+  const names = ["UPSTASH_REDIS_REST_URL", "UPSTASH_REDIS_REST_TOKEN"];
+  const saved = saveEnv(names);
+  const originalFetch = globalThis.fetch;
+  process.env.UPSTASH_REDIS_REST_URL = "https://redis.test";
+  process.env.UPSTASH_REDIS_REST_TOKEN = "test-redis-token";
+  globalThis.fetch = async () => ({
+    ok: true,
+    async json() { return { result: [1, 60] }; }
+  });
+  try {
+    await run();
+  } finally {
+    globalThis.fetch = originalFetch;
+    restoreEnv(saved);
+  }
+}
+
 async function withConfiguredGateway(run) {
   const names = ["HCNSEC_API_KEY", "HCNSEC_MODEL", "ATELIER_SESSION_SECRET"];
   const saved = saveEnv(names);
@@ -41,8 +59,10 @@ async function withConfiguredGateway(run) {
   process.env.HCNSEC_MODEL = "test-model";
   process.env.ATELIER_SESSION_SECRET = testSecret;
   try {
-    const token = issueSessionToken(testSecret);
-    await run(token);
+    await withConfiguredRedis(async () => {
+      const token = issueSessionToken(testSecret);
+      await run(token);
+    });
   } finally {
     restoreEnv(saved);
   }
@@ -111,8 +131,10 @@ test("session endpoint exchanges the correct password for a signed session", asy
   process.env.ATELIER_ACCESS_PASSWORD = "a-private-workspace-password";
   process.env.ATELIER_SESSION_SECRET = testSecret;
   try {
-    const res = response();
-    await authSession({ method: "POST", headers: { origin: allowedOrigin }, body: { password: "a-private-workspace-password" } }, res);
+    await withConfiguredRedis(async () => {
+      const res = response();
+      await authSession({ method: "POST", headers: { origin: allowedOrigin }, body: { password: "a-private-workspace-password" } }, res);
+    });
     assert.equal(res.statusCode, 200);
     assert.equal(res.body.ok, true);
     assert.equal(verifySessionToken(res.body.token, testSecret), true);
@@ -127,8 +149,10 @@ test("session endpoint rejects an incorrect password", async () => {
   process.env.ATELIER_ACCESS_PASSWORD = "a-private-workspace-password";
   process.env.ATELIER_SESSION_SECRET = testSecret;
   try {
-    const res = response();
-    await authSession({ method: "POST", headers: { origin: allowedOrigin }, body: { password: "wrong-password" } }, res);
+    await withConfiguredRedis(async () => {
+      const res = response();
+      await authSession({ method: "POST", headers: { origin: allowedOrigin }, body: { password: "wrong-password" } }, res);
+    });
     assert.equal(res.statusCode, 401);
     assert.equal(res.body.error.code, "INVALID_PASSWORD");
   } finally {
