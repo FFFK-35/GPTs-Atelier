@@ -38,6 +38,15 @@ The browser sends the workspace password to `POST /api/auth/session` over HTTPS.
 
 The gateway limits requests to 20 messages and 12,000 input characters, and limits output to 1,200 tokens. It does not expose provider errors or credentials to the browser.
 
+### Shared Redis rate limiting (prototype)
+
+The model gateway requires a shared Redis-compatible store before accepting requests. Configure the Upstash Redis REST endpoint and token as server-side environment variables:
+
+- `UPSTASH_REDIS_REST_URL`
+- `UPSTASH_REDIS_REST_TOKEN`
+
+The login endpoint allows 5 attempts per client IP per 60-second window. On Render's public edge, the limiter reads Cloudflare's `CF-Connecting-IP` header and validates it as an IP address; it does not trust the leftmost `X-Forwarded-For` value because clients can spoof that header. If the trusted header is absent or invalid, requests share a conservative `unknown` bucket rather than gaining a fresh identity. The chat endpoint allows 20 requests per signed session per 60-second window. If Redis is missing or unavailable, these protected endpoints fail closed with HTTP 503 rather than silently running without limits. This is a baseline prototype, not a substitute for provider spending limits, alerts, or edge/WAF protections. Never expose the Redis token in frontend code or commit it.
+
 ### Required deployment safeguards
 
 This serverless implementation does not provide durable per-user rate limiting by itself. Before enabling the public model endpoint, configure hosting-platform rate limits/WAF rules for both `/api/auth/session` and `/api/ai/chat`, plus usage/budget alerts at the model provider. Origin checks and CORS are defense-in-depth, not authentication. Do not deploy the model endpoint for public use until those controls are active.

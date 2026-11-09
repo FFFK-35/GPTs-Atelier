@@ -1,0 +1,27 @@
+name: Chat Studio frontend checks
+
+on:
+  pull_request:
+    paths:
+      - "INTERFACES/chat-studio-01/**"
+      - "INTERFACES/control-center-01/index.html"
+      - ".github/workflows/chat-studio-check.yml"
+  push:
+    branches: [main]
+    paths:
+      - "INTERFACES/chat-studio-01/**"
+      - "INTERFACES/control-center-01/index.html"
+      - ".github/workflows/chat-studio-check.yml"
+
+jobs:
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Check Chat Studio markup and inline scripts
+        run: node INTERFACES/chat-studio-01/check.mjs
