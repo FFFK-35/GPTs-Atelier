@@ -1,3 +1,5 @@
+import { isIP } from "node:net";
+
 const WINDOW_SECONDS = 60;
 
 export async function enforceRateLimit({ scope, identity, limit }) {
@@ -27,7 +29,10 @@ export async function enforceRateLimit({ scope, identity, limit }) {
 }
 
 export function getClientIdentity(req) {
-  const forwarded = req.headers?.["x-forwarded-for"];
-  const ip = typeof forwarded === "string" ? forwarded.split(",")[0].trim() : "";
-  return ip && ip.length <= 128 ? ip : "unknown";
+  // Render's public edge is behind Cloudflare. Unlike X-Forwarded-For,
+  // CF-Connecting-IP is overwritten by Cloudflare and cannot be chosen by
+  // the incoming client. Never trust the leftmost X-Forwarded-For value.
+  const candidate = req.headers?.["cf-connecting-ip"];
+  const ip = typeof candidate === "string" ? candidate.trim() : "";
+  return isIP(ip) ? ip : "unknown";
 }
