@@ -81,6 +81,7 @@
       setStatus("工作室已登录", "已通过工作室后端建立会话。发送消息时将调用已配置的模型服务。");
       loginButton.textContent = "退出登录";
       loginButton.setAttribute("aria-label", "退出工作室登录");
+      passwordInput.value = "";
       closeLogin();
       if (pendingMessage) {
         const queued = pendingMessage;
