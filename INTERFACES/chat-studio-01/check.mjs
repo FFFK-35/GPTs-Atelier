@@ -31,8 +31,7 @@ const chat = inspectHtml(chatPath, [
   "localStorage", "e.shiftKey", "safe-area-inset-bottom"
 ]);
 
-assert.ok(chat.includes("模型未连接"), "Preview must clearly show that no model is connected");
-assert.ok(chat.includes("不会发送给模型"), "Preview must explain that messages stay local");
+assert.ok(chat.includes('id="connectionNote"'), "Chat Studio must explain the model connection state");
 assert.ok(chat.includes("closeSidebar(true)"), "Mobile sidebar must support Escape and return focus to its trigger");
 for (const id of ["renameChat", "exportChat", "deleteChat"]) {
   assert.ok(chat.includes('id="' + id + '"'), `Missing local conversation action: ${id}`);
@@ -50,7 +49,14 @@ assert.ok(chat.includes("toLocaleLowerCase"), "Chat search must be case-insensit
 
 
 assert.ok(chat.includes("chats.filter(item=>item.id!==c.id)"), "Conversation deletion must remove only the active local chat");
-assert.ok(!/fetch\s*\(/i.test(chat), "Phase 1 frontend must not call remote APIs");
+const runtimePath = resolve(here, "chat-runtime.js");
+const runtime = readFileSync(runtimePath, "utf8");
+assert.doesNotThrow(() => new Function(runtime), "Invalid model runtime JavaScript");
+assert.ok(runtime.includes("/api/auth/session"), "Frontend must authenticate before model access");
+assert.ok(runtime.includes("/api/ai/chat"), "Frontend must call the authenticated chat endpoint");
+assert.ok(runtime.includes("Authorization"), "Chat requests must carry the short-lived session token");
+assert.ok(!/HCNSEC_API_KEY|ATELIER_SESSION_SECRET|sk-[A-Za-z0-9]{16,}/.test(runtime), "Frontend must not contain credentials");
+assert.ok(!/localStorage\.(?:setItem|getItem).*token/i.test(runtime), "Session tokens must not be persisted in localStorage");
 assert.ok(
   !/HCNSEC_API_KEY|ATELIER_SESSION_SECRET|sk-[A-Za-z0-9]{16,}/.test(chat),
   "Frontend must not contain credentials"
