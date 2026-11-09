@@ -33,6 +33,7 @@ const chat = inspectHtml(chatPath, [
 
 assert.ok(chat.includes('id="connectionNote"'), "Chat Studio must explain the model connection state");
 assert.ok(chat.includes("closeSidebar(true)"), "Mobile sidebar must support Escape and return focus to its trigger");
+assert.ok(chat.includes("if(typeof window.sendMessage==='function'){window.sendMessage(content);return}"), "Composer must dispatch messages to the authenticated model runtime when available");
 for (const id of ["renameChat", "exportChat", "deleteChat"]) {
   assert.ok(chat.includes('id="' + id + '"'), `Missing local conversation action: ${id}`);
 }
