@@ -45,7 +45,7 @@ The model gateway requires a shared Redis-compatible store before accepting requ
 - `UPSTASH_REDIS_REST_URL`
 - `UPSTASH_REDIS_REST_TOKEN`
 
-The login endpoint allows 5 attempts per IP per 60-second window. The chat endpoint allows 20 requests per signed session per 60-second window. If Redis is missing or unavailable, these protected endpoints fail closed with HTTP 503 rather than silently running without limits. This is a baseline prototype, not a substitute for provider spending limits, alerts, or edge/WAF protections. Never expose the Redis token in frontend code or commit it.
+The login endpoint allows 5 attempts per client IP per 60-second window. On Render's public edge, the limiter reads Cloudflare's `CF-Connecting-IP` header and validates it as an IP address; it does not trust the leftmost `X-Forwarded-For` value because clients can spoof that header. If the trusted header is absent or invalid, requests share a conservative `unknown` bucket rather than gaining a fresh identity. The chat endpoint allows 20 requests per signed session per 60-second window. If Redis is missing or unavailable, these protected endpoints fail closed with HTTP 503 rather than silently running without limits. This is a baseline prototype, not a substitute for provider spending limits, alerts, or edge/WAF protections. Never expose the Redis token in frontend code or commit it.
 
 ### Required deployment safeguards
 
