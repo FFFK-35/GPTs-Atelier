@@ -56,6 +56,7 @@ assert.doesNotThrow(() => new Function(runtime), "Invalid model runtime JavaScri
 assert.ok(runtime.includes("/api/auth/session"), "Frontend must authenticate before model access");
 assert.ok(runtime.includes("/api/ai/chat"), "Frontend must call the authenticated chat endpoint");
 assert.ok(runtime.includes("Authorization"), "Chat requests must carry the short-lived session token");
+assert.ok(runtime.includes("passwordInput.value = \"\";"), "Workspace password must be cleared from the login form after successful authentication");
 assert.ok(!/HCNSEC_API_KEY|ATELIER_SESSION_SECRET|sk-[A-Za-z0-9]{16,}/.test(runtime), "Frontend must not contain credentials");
 assert.ok(!/localStorage\.(?:setItem|getItem).*token/i.test(runtime), "Session tokens must not be persisted in localStorage");
 assert.ok(
